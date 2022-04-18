@@ -2,7 +2,8 @@
 .PHONY: all install test uninstall clean sst-info sst-help help
 
 # shortcut for running anything inside the singularity container
-CONTAINER=singularity exec 2022HPCSummer-SST/sstpackage-11.1.0-ubuntu-20.04.sif
+CONTAINER=/usr/local/bin/sstpackage-11.1.0-ubuntu-20.04.sif
+SINGULARITY=singularity exec $(CONTAINER)
 
 # SST environment variables (gathered from the singularity container)
 CXX=g++
@@ -20,11 +21,9 @@ PACKAGE=deadlock
 # Simply typing "make" calls this by default, so everything gets built and installed
 all: test
 
-# initialize the singularity container and make sure the sstsimulator.conf exists
+# make sure the sstsimulator.conf exists
 # You shouldn't call this target directly, it gets called by other targets
-2022HPCSummer-SST/sstpackage-11.1.0-ubuntu-20.04.sif:
-	git submodule init
-	git submodule update
+~/.sst/sstsimulator.conf:
 	mkdir -p ~/.sst
 	touch ~/.sst/sstsimulator.conf
 
@@ -33,38 +32,38 @@ all: test
 -include $(DEP)
 .build/%.o: %.cpp
 	mkdir -p $(@D)
-	$(CONTAINER) $(CXX) $(CXXFLAGS) -MMD -c $< -o $@
+	$(SINGULARITY) $(CXX) $(CXXFLAGS) -MMD -c $< -o $@
 
 # Link all the objects to create the library
 # You shouldn't call this target directly, it gets called by other targets
 lib$(PACKAGE).so: $(OBJ)
-	$(CONTAINER) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
+	$(SINGULARITY) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
 
 
 # User callable targets below:
 
 # Register the model with SST
-install: 2022HPCSummer-SST/sstpackage-11.1.0-ubuntu-20.04.sif lib$(PACKAGE).so
-	$(CONTAINER) sst-register $(PACKAGE) $(PACKAGE)_LIBDIR=$(CURDIR)
+install: $(CONTAINER) ~/.sst/sstsimulator.conf lib$(PACKAGE).so
+	$(SINGULARITY) sst-register $(PACKAGE) $(PACKAGE)_LIBDIR=$(CURDIR)
 
 # Run the tests for the model
-test: 2022HPCSummer-SST/sstpackage-11.1.0-ubuntu-20.04.sif install
-	$(CONTAINER) echo "Run tests here"
+test: $(CONTAINER) install
+	$(SINGULARITY) echo "Run tests here"
 
 # Unregister the model with SST
-uninstall: 2022HPCSummer-SST/sstpackage-11.1.0-ubuntu-20.04.sif
-	$(CONTAINER) sst-register -u $(PACKAGE)
+uninstall: $(CONTAINER) ~/.sst/sstsimulator.conf
+	$(SINGULARITY) sst-register -u $(PACKAGE)
 
 # Remove the build files and the library
 clean: uninstall
 	rm -rf .build *.so
 
-sst-info: 2022HPCSummer-SST/sstpackage-11.1.0-ubuntu-20.04.sif
-	$(CONTAINER) sst-info $(arg)
+sst-info: $(CONTAINER)
+	$(SINGULARITY) sst-info $(arg)
 
-sst-help: 2022HPCSummer-SST/sstpackage-11.1.0-ubuntu-20.04.sif
-	$(CONTAINER) sst --help
+sst-help: $(CONTAINER)
+	$(SINGULARITY) sst --help
 
 help:
 	@echo "Target     | Description"
