@@ -1,0 +1,73 @@
+\documentclass{article}
+
+\usepackage{tikz} 
+
+\usepackage{amsmath} % advanced math
+
+% margins of 1 inch:
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9.5in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\begin{document}
+
+    % https://stackoverflow.com/a/3408428/1164295
+    \begin{minipage}[h]{\textwidth}
+        \title{Summer 2022 Challenge:\\(Name of challenge)}
+        \author{Firstname Lastname\footnote{myemailaddress@domain.com}\ , 
+        AnotherFirst AnotherLast\footnote{anemail@domain.com}}
+        \date{\today}
+            \maketitle
+        \begin{abstract}
+            This challenge problem was solved / progress was made
+        \end{abstract}
+    \end{minipage}
+
+\ \\
+% see https://en.wikipedia.org/wiki/George_H._Heilmeier#Heilmeier's_Catechism
+
+%\maketitle
+
+\section{Challenge Description} % what problem is being addressed? 
+
+The challenge addressed by this work is ...
+
+\section{Motivation} % Why does this work matter? Who cares? If you're successful, what difference does it make?
+
+The users of this work include ...
+
+\section{Prior work} % what does this build on?
+
+See \cite{texbook} for prior work in this area.
+
+\section{How to do the thing}
+
+The software developed to respond to this challenge was run on (one laptop/a cluster of 100 nodes).
+
+The software is available on (https://github.com/your/project/)
+
+\section{Result} % conclusion/summary
+
+The result is ...
+
+\begin{thebibliography}{9}
+\bibitem{texbook}
+Donald E. Knuth (1986) \emph{The \TeX{} Book}, Addison-Wesley Professional.
+
+\bibitem{lamport94}
+Leslie Lamport (1994) \emph{\LaTeX: a document preparation system}, Addison
+Wesley, Massachusetts, 2nd ed.
+\end{thebibliography}
+
+\end{document}
