@@ -18,6 +18,7 @@ public:
 
 	void recvEvent(SST::Event *ev);
 	void creditEvent(SST::Event *ev);
+	void handleEvent(SST::Event *ev);
 	
 	// Register the component for lookup via sst-info
 	SST_ELI_REGISTER_COMPONENT(
@@ -36,8 +37,8 @@ public:
 
 	// Port name, description, event type
 	SST_ELI_DOCUMENT_PORTS(
-		{"recvPort", "Port which outputs a message into the next nodes queue", {"sst.Interfaces.StringEvent"}},
-		{"creditPort", "Port which sends credit info to previous node.", {"sst.Interfaces.StringEvent"}}
+		{"nextPort", "Port which outputs a message into the next nodes queue", {"sst.Interfaces.StringEvent"}},
+		{"prevPort", "Port which sends credit info to previous node.", {"sst.Interfaces.StringEvent"}}
 	)
 
 private:
@@ -51,8 +52,8 @@ private:
 	void sendMessage(); // Sends a single message across a link from one node to a connected nodes queue.
 	void sendCredits(); // Sends number of credits to previous node in circular list.
 	void addMessage(); // Utilizes RNG to add messages to each node to simulate messages added from external sources.
-	SST::Link *recvPort; // Pointer to queue port
-	SST::Link *creditPort; // Pointer to port that will send # of credits to previous node.
+	SST::Link *nextPort; // Pointer to queue port
+	SST::Link *prevPort; // Pointer to port that will send # of credits to previous node.
 
 	std::string clock; // Defining a clock which can be described via unit math as a string (?).
 };
