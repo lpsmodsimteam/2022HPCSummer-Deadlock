@@ -10,9 +10,9 @@ CXX=g++
 CXXFLAGS=-std=c++1y -D__STDC_FORMAT_MACROS -fPIC -DHAVE_CONFIG_H -I/opt/SST/11.1.0/include
 LDFLAGS =-shared -fno-common -Wl,-undefined -Wl,dynamic_lookup
 
-# Grab all the .cpp files, put objs and depends in the .build folder
+# Grab all the .cc files, put objs and depends in the .build folder
 SRC=$(wildcard *.cc)
-OBJ=$(SRC:%.cpp=.build/%.o)
+OBJ=$(SRC:%.cc=.build/%.o)
 DEP=$(OBJ:%.o=%.d)
 
 # Name of the library we will be working with
@@ -30,7 +30,7 @@ all: test
 # Use the dependencies when compiling to check for header file changes
 # You shouldn't call this target directly, it gets called by other targets
 -include $(DEP)
-.build/%.o: %.cpp
+.build/%.o: %.cc
 	mkdir -p $(@D)
 	$(SINGULARITY) $(CXX) $(CXXFLAGS) -MMD -c $< -o $@
 
@@ -68,7 +68,7 @@ sst-help: $(CONTAINER)
 help:
 	@echo "Target     | Description"
 	@echo "-----------+-------------------------------------------------------"
-	@echo "install    | Builds all .cpp files into a library lib$(PACKAGE).so,"
+	@echo "install    | Builds all .cc files into a library lib$(PACKAGE).so,"
 	@echo "           |  then registers the package with SST"
 	@echo "           |"
 	@echo "test       | Runs tests"

@@ -35,7 +35,7 @@ public:
 
 	// Port name, description, event type
 	SST_ELI_DOCUMENT_PORTS(
-		{"recvPort", "Port which outputs a payload into the next nodes queue", {"sst.Interfaces.StringEvent"}}
+		{"recvPort", "Port which outputs a payload into the next nodes queue", {"sst.Interfaces.StringEvent"}},
 		{"creditPort", "Port which sends credit info to previous node.", {"sst.Interfaces.StringEvent"}}
 	)
 

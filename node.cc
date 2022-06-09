@@ -85,6 +85,7 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 void node::recvEvent(SST::Event *ev) {
 	// StringEvent is unnecessary 
 	queueCurrSize++; // Increment queue size.
+	delete ev;
 
 }
 
@@ -100,7 +101,7 @@ void node::creditEvent(SST::Event *ev) {
 // Simulate sending a single message out to linked component in composition.
 void node::sendMessage() {
 	queueCurrSize--; 
-	recvPort->send(new StringEvent(std::to_string(5)));
+	recvPort->send(new StringEvent("Arbitrary"));
 }
 
 // Send # of slots in queue to previous connected node.
