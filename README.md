@@ -21,4 +21,4 @@ This demonstration of deadlock relies only on [SST-Core](https://github.com/ssts
 
 The intended audience for this documentation has basic familiar with use of SST, C++, Python, Makefiles.
 
-Documentation should explain how the concept of Congestive Collapse is mapped to the SST model.
+Documentation should explain how the concept of deadlock is mapped to the SST model.
