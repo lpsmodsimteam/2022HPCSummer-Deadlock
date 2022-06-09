@@ -11,7 +11,7 @@ CXXFLAGS=-std=c++1y -D__STDC_FORMAT_MACROS -fPIC -DHAVE_CONFIG_H -I/opt/SST/11.1
 LDFLAGS =-shared -fno-common -Wl,-undefined -Wl,dynamic_lookup
 
 # Grab all the .cpp files, put objs and depends in the .build folder
-SRC=$(wildcard *.cpp)
+SRC=$(wildcard *.cc)
 OBJ=$(SRC:%.cpp=.build/%.o)
 DEP=$(OBJ:%.o=%.d)
 
@@ -49,7 +49,7 @@ install: $(CONTAINER) ~/.sst/sstsimulator.conf lib$(PACKAGE).so
 
 # Run the tests for the model
 test: $(CONTAINER) install
-	$(SINGULARITY) echo "Run tests here"
+	$(SINGULARITY) sst tests/deadlock.py
 
 # Unregister the model with SST
 uninstall: $(CONTAINER) ~/.sst/sstsimulator.conf
