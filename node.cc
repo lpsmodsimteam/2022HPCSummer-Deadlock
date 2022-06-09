@@ -18,10 +18,14 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	// Get parameters
 	queueMaxSize = params.find<int64_t>("queueMaxSize", 50);
 	clock = params.find<std::string>("tickFreq", "10s");
+	randSeed = params.find<int64_t>("randseed", 112233);
 
 	// Initialize Variables
 	queueCredits = 0;
 	queueCurrSize = 0;
+
+	// Initialize Random
+	rng = new SST::RNG::MarsagliaRNG(10, randSeed); // Creates a Marsaglia RNG with a default value and a random seed.
 
 	// Register the node as a primary component.
 	// Then declare that the simulation cannot end until this 
@@ -37,8 +41,8 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	// Configure the port for receiving a message from a node.
 	recvPort = configureLink("recvPort", new SST::Event::Handler<node>(this, &node::recvEvent));
 	// Check if port exist. Error out if not
-	if (!recvPort) {
-		output.fatal(CALL_INFO, -1, "Failed to configure port 'output'\n");
+	if ( !recvPort ) {
+		output.fatal(CALL_INFO, -1, "Failed to configure port 'recvPort'\n");
 	}
 
 	// Configure our port for returning credit information to a node.
@@ -55,24 +59,31 @@ node::~node() {
 }
 
 bool node::tick( SST::Cycle_t currentCycle ) {
-	//Testing simulation, just trying to get some output.
-	output.output("Sending 10 times...");
-	
 	// Replace with output
-	std::cout << "Size of queue: " << queueCurrSize << std::endl;
+	output.output(CALL_INFO, "Size of queue: %d\n", queueCurrSize);
+	output.output(CALL_INFO, "Amount of credits: %d\n", queueCredits);
+	std::cout << "Sim-Time: " << getCurrentSimTimeNano() << std::endl;
+
 
 	// Checking if queue size is full if linked nodes queue size is full.
-	if (queueCurrSize == 10) {
+	if ( queueCurrSize >= 50 ) {
 		// This will need to be edited, it will end when its full 
 		// but not necessarily when a node exists.
+		output.output(CALL_INFO, "DEADLOCKED (kinda)\n");
 		primaryComponentOKToEndSim();
 		return(true);
 	}
+	
 
 	// Rng and collect messages and add to queue size.
+	if (queueCurrSize < queueMaxSize) {
+		addMessage();
+	}
 
-	// Send a message out every tick if the next nodes queue is not full.
-	if (queueCredits > queueMaxSize) {
+	// Send a message out every tick if the next nodes queue is not full,
+	// and if the node has messages in its queue to send.
+	if (queueCredits <= queueMaxSize && queueCredits >= 0 && queueCurrSize > 0) {
+		//output.output(CALL_INFO, "Sending Message\n");
 		sendMessage();
 	}
 
@@ -81,7 +92,7 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	return(false);
 }
 
-// Receive payload from node.
+// Receive message from node.
 void node::recvEvent(SST::Event *ev) {
 	// StringEvent is unnecessary 
 	queueCurrSize++; // Increment queue size.
@@ -109,9 +120,14 @@ void node::sendCredits() {
 	creditPort->send(new StringEvent(std::to_string(queueCurrSize)));
 }
 
-// Simulation purposes, add messages random to a nodes queue.
+// Simulation purposes, add messages randomly to a nodes queue.
 void node::addMessage() {
+	int rndNumber;
+	rndNumber = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
+	rndNumber = (rndNumber & 0x0000FFFF) ^ ((rndNumber & 0xFFFF0000) >> 16); // XOR the upper 16 bits with the lower 16 bits.
+	rndNumber = abs((int)(rndNumber % 3)); // Generate a integer 0-2.
 
+	queueCurrSize += rndNumber; // Add messages to queue.
 }
 
 

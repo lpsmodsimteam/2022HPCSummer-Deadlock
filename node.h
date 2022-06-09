@@ -3,6 +3,7 @@
 
 #include <sst/core/component.h>
 #include <sst/core/link.h>
+#include <sst/core/rng/marsaglia.h>
 
 #define QUEUE_NOT_FULL 0
 #define QUEUE_FULL 1
@@ -35,7 +36,7 @@ public:
 
 	// Port name, description, event type
 	SST_ELI_DOCUMENT_PORTS(
-		{"recvPort", "Port which outputs a payload into the next nodes queue", {"sst.Interfaces.StringEvent"}},
+		{"recvPort", "Port which outputs a message into the next nodes queue", {"sst.Interfaces.StringEvent"}},
 		{"creditPort", "Port which sends credit info to previous node.", {"sst.Interfaces.StringEvent"}}
 	)
 
@@ -44,10 +45,12 @@ private:
 	int queueMaxSize; // Max size of nodes queue.
 	int queueCurrSize; // Current size of nodes queue.
 	int queueCredits; // Amount of space left in the next linked nodes queue. 
-	void sendMessage(); // Sends a single payload across a link from one node to a connected nodes queue.
+	int64_t randSeed; // Seed for MarsagliaRNG
+	SST::RNG::MarsagliaRNG *rng; //
+
+	void sendMessage(); // Sends a single message across a link from one node to a connected nodes queue.
 	void sendCredits(); // Sends number of credits to previous node in circular list.
 	void addMessage(); // Utilizes RNG to add messages to each node to simulate messages added from external sources.
-
 	SST::Link *recvPort; // Pointer to queue port
 	SST::Link *creditPort; // Pointer to port that will send # of credits to previous node.
 
