@@ -65,6 +65,9 @@ sst-info: $(CONTAINER)
 sst-help: $(CONTAINER)
 	$(SINGULARITY) sst --help
 
+viz_Makefile:
+	makefile2dot | dot -Tpng > Makefile_viz.png
+
 help:
 	@echo "Target     | Description"
 	@echo "-----------+-------------------------------------------------------"
