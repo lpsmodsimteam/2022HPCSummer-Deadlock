@@ -15,7 +15,7 @@ public:
 	node( SST::ComponentId_t id, SST::Params& params ); // Constructor
 	~node(); // Deconstructor
 
-	bool tick( SST::Cycle_t currentCycle); // 
+	bool tick( SST::Cycle_t currentCycle); 
 
 	void handleEvent(SST::Event *ev);
 	
@@ -32,12 +32,13 @@ public:
 	// Parameters, description, default value
 	SST_ELI_DOCUMENT_PARAMS(
 		{"queueMaxSize", "The size of the node's queue.", "50"},
+		{"tickFreq", "The frequency the component is called at.", "10s"}
 	)
 
 	// Port name, description, event type
 	SST_ELI_DOCUMENT_PORTS(
-		{"nextPort", "Port which outputs a message into the next nodes queue", {"sst.Interfaces.StringEvent"}},
-		{"prevPort", "Port which sends credit info to previous node.", {"sst.Interfaces.StringEvent"}}
+		{"nextPort", "Port which outputs a message or status request into the next nodes queue.", {"MessageEvent"}},
+		{"prevPort", "Port which sends credit info to previous node.", {"MessageEvent"}}
 	)
 
 private:
@@ -64,12 +65,13 @@ enum MessageTypes {
 	STATUS,
 };
 
+// Status types
 enum StatusTypes {
 	SENDING,
 	WAITING,
 };
 
-// Struct for a message
+// Struct for a Message
 struct Message {
 	std::string source_node;
 	MessageTypes type;
@@ -77,10 +79,10 @@ struct Message {
 	int credits;
 };
 
-class BaseMessageEvent : public SST::Event {
+class MessageEvent : public SST::Event {
 
 public:
-	// 
+	
 	void serialize_order(SST::Core::Serialization::serializer &ser) override {
 		Event::serialize_order(ser);
 		ser & msg.source_node;
@@ -88,19 +90,18 @@ public:
 		ser & msg.credits;
 	}
 
-	//
-	BaseMessageEvent(Message msg) :
+	
+	MessageEvent(Message msg) :
 		Event(),
 		msg(msg)
 	{}
 
-	//
-	BaseMessageEvent() {} // For Serialization only
+	
+	MessageEvent() {} // For Serialization only
 
-	// MessageEventType type;
 	Message msg; 
 
-	ImplementSerializable(BaseMessageEvent); //
+	ImplementSerializable(MessageEvent); //
 };
 
 

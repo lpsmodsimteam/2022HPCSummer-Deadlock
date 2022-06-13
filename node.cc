@@ -61,6 +61,7 @@ node::~node() {
 
 }
 
+// Runs every clock tick
 bool node::tick( SST::Cycle_t currentCycle ) {
 	// Replace with output
 	output.output(CALL_INFO, "Size of queue: %d\n", queueCurrSize);
@@ -70,15 +71,15 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 
 	// Checking if no credits are available.
 	if ( queueCredits <= 0 ) {
-		// This will need to be edited, it will end when its full 
-		// but not necessarily when a node exists.
-		output.output(CALL_INFO, "DEADLOCKED (kinda)\n");
+		// If the node has no credits, it is idling. Send out a status message to check for deadlock.
+		output.output(CALL_INFO, "Status Check\n");
 
+		// Construct Status message.
 		MessageTypes type = STATUS;
 		StatusTypes status = WAITING;
 		int numCredits = queueMaxSize - queueCurrSize;
 		struct Message msg = { getName(), type, status, numCredits };
-		nextPort->send(new BaseMessageEvent(msg));
+		nextPort->send(new MessageEvent(msg));
 		
 		//primaryComponentOKToEndSim();
 		//return(true);
@@ -91,9 +92,8 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	}
 
 	// Send a message out every tick if the next nodes queue is not full,
-	// and if the node has messages in its queue to send.
+	// AND if the node has messages in its queue to send.
 	if (queueCredits > 0 && queueCurrSize > 0) {
-
 		//output.output(CALL_INFO, "Sending Message\n");
 		sendMessage();
 	}
@@ -104,7 +104,7 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 }
 
 void node::handleEvent(SST::Event *ev) {
-	BaseMessageEvent *me = dynamic_cast<BaseMessageEvent*>(ev);
+	MessageEvent *me = dynamic_cast<MessageEvent*>(ev);
 	if ( me != NULL ) {
 		switch (me->msg.type)
 		{
@@ -146,7 +146,7 @@ void node::handleEvent(SST::Event *ev) {
 							StatusTypes status = SENDING;
 							int numCredits = me->msg.credits;
 							struct Message msg = { me->msg.source_node, type, status, numCredits };
-							nextPort->send(new BaseMessageEvent(msg));
+							nextPort->send(new MessageEvent(msg));
 						}
 
 					// 2. The node receives the status WAITING. In this case the previous node(s) is waiting.
@@ -158,13 +158,13 @@ void node::handleEvent(SST::Event *ev) {
 								StatusTypes status = WAITING;
 								int numCredits = me->msg.credits;
 								struct Message msg = { me->msg.source_node, type, status, numCredits };
-								nextPort->send(new BaseMessageEvent(msg));
+								nextPort->send(new MessageEvent(msg));
 							} else {
 								MessageTypes type = STATUS;
 								StatusTypes status = SENDING;
 								int numCredits = me->msg.credits;
 								struct Message msg = { me->msg.source_node, type, status, numCredits };
-								nextPort->send(new BaseMessageEvent(msg));
+								nextPort->send(new MessageEvent(msg));
 							}
 						}
 
@@ -173,28 +173,31 @@ void node::handleEvent(SST::Event *ev) {
 				}
 				break;
 		}
-
-		
 	}
+	delete ev;
 }
 
 // Simulate sending a single message out to linked component in composition.
 void node::sendMessage() {
 	queueCurrSize--; 
+
+	// Construct message to send.
 	MessageTypes type = MESSAGE;
 	StatusTypes status = SENDING;
 	int numCredits = queueMaxSize - queueCurrSize;
 	struct Message msg = { getName(), type, status, numCredits };
 
-	nextPort->send(new BaseMessageEvent(msg));
+	nextPort->send(new MessageEvent(msg));
 }
 
+// Send number of credits left to the previous node.
 void node::sendCredits() {
+	// Construct credit message to send.
 	MessageTypes type = CREDIT;
 	StatusTypes status = SENDING;
 	int numCredits = queueMaxSize - queueCurrSize;
 	struct Message msg = { getName(), type, status, numCredits };
-	prevPort->send(new BaseMessageEvent(msg));
+	prevPort->send(new MessageEvent(msg));
 }
 
 // Simulation purposes, add messages randomly to a nodes queue.
@@ -204,7 +207,7 @@ void node::addMessage() {
 	//rndNumber = (rndNumber & 0x0000FFFF) ^ ((rndNumber & 0xFFFF0000) >> 16); // XOR the upper 16 bits with the lower 16 bits.
 	rndNumber = abs((int)(rndNumber % 3)); // Generate a integer 0-2.
 
-	queueCurrSize += 1; // Add messages to queue.
+	queueCurrSize += rndNumber; // Add messages to queue.
 }
 
 
