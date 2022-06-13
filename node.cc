@@ -23,7 +23,6 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	randSeed = params.find<int64_t>("randseed", 112233);
 
 	// Initialize Variables
-	//queueCredits = queueMaxSize;
 	queueCurrSize = 0;
 	queueCredits = 1; // Arbitrary non-zero number since this will be overwritten after the first tick.
 
@@ -122,14 +121,7 @@ void node::handleEvent(SST::Event *ev) {
 				// If the message originated from the same node, the status message has looped through
 				// the ring of nodes back to its original sender.
 				if (me->msg.source_node == getName()) {
-					//std::cout << getName() << " received a message from itself!" << std::endl;
-					// If the status is sending, a node in the ring can still send messages so a deadlock
-					// has not occured.
-					if (me->msg.status == SENDING) {
-						//Can remove this ?
-					}
-
-					// All nodes in the ring have status Waiting, a deadlock has occured.
+					// All nodes in the ring have status WAITING, a deadlock has occured.
 					if (me->msg.status == WAITING) {
 						SST::StopAction exit;
 						exit.execute();
@@ -208,6 +200,11 @@ void node::addMessage() {
 	rndNumber = abs((int)(rndNumber % 3)); // Generate a integer 0-2.
 
 	queueCurrSize += rndNumber; // Add messages to queue.
+}
+
+Message node::constructMsg(std::string source_node, MessageTypes type, StatusTypes status, int numCredits) {
+	Message msg = { source_node, type, status, numCredits };
+	return msg;
 }
 
 

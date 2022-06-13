@@ -1,5 +1,5 @@
 # Tell Make that these are NOT files, just targets
-.PHONY: all install png test uninstall clean sst-info sst-help viz_Makefile help 
+.PHONY: all install test uninstall clean sst-info sst-help viz_makefile viz_dot black help 
 
 # shortcut for running anything inside the singularity container
 CONTAINER=/usr/local/bin/additions.sif
@@ -39,18 +39,11 @@ all: test
 lib$(PACKAGE).so: $(OBJ)
 	$(SINGULARITY) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
-
-
 # User callable targets below:
 
 # Register the model with SST
 install: $(CONTAINER) ~/.sst/sstsimulator.conf lib$(PACKAGE).so
 	$(SINGULARITY) sst-register $(PACKAGE) $(PACKAGE)_LIBDIR=$(CURDIR)
-
-# Run the tests for the model and output a dot file which is converted to a png file.
-png: $(CONTAINER) install
-	$(SINGULARITY) sst tests/$(PACKAGE).py --output-dot=$(PACKAGE).dot --dot-verbosity=6
-	$(SINGULARITY) dot -Tpng $(PACKAGE).dot $(PACKAGE).png
 
 # Run the tests for the model
 test: $(CONTAINER) install
@@ -70,9 +63,17 @@ sst-info: $(CONTAINER)
 sst-help: $(CONTAINER)
 	$(SINGULARITY) sst --help
 
-viz_Makefile: $(CONTAINER)
+viz_makefile: $(CONTAINER)
 	$(SINGULARITY) makefile2dot --output $(PACKAGE)makefile.dot
 	$(SINGULARITY) dot -Tpng $(PACKAGE)makefile.dot > Makefile_viz.png
+
+# Run the tests for the model and output a dot file which is converted to a png file.
+viz_dot: $(CONTAINER) install
+	$(SINGULARITY) sst tests/$(PACKAGE).py --output-dot=$(PACKAGE).dot --dot-verbosity=6
+	$(SINGULARITY) dot -Tpng $(PACKAGE).dot > $(PACKAGE).png
+
+black: $(CONTAINER)
+	$(SINGULARITY) black tests/*.py
 
 help:
 	@echo "Target     | Description"

@@ -52,6 +52,7 @@ private:
 	void sendMessage(); // Sends a single message across a link from one node to a connected nodes queue.
 	void sendCredits(); // Sends number of credits to previous node in circular list.
 	void addMessage(); // Utilizes RNG to add messages to each node to simulate messages added from external sources.
+	Message constructMsg(std::string source_node, MessageTypes type, StatusTypes status, int numCredits);
 	SST::Link *nextPort; // Pointer to queue port
 	SST::Link *prevPort; // Pointer to port that will send # of credits to previous node.
 
