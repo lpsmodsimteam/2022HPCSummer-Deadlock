@@ -17,10 +17,7 @@ public:
 
 	bool tick( SST::Cycle_t currentCycle); // 
 
-	void recvEvent(SST::Event *ev);
-	void creditEvent(SST::Event *ev);
 	void handleEvent(SST::Event *ev);
-	void testMsgEvent(SST::Event *ev);
 	
 	// Register the component for lookup via sst-info
 	SST_ELI_REGISTER_COMPONENT(
@@ -52,7 +49,6 @@ private:
 	SST::RNG::MarsagliaRNG *rng; //
 
 	void sendMessage(); // Sends a single message across a link from one node to a connected nodes queue.
-	void sendCreditsMsg();
 	void sendCredits(); // Sends number of credits to previous node in circular list.
 	void addMessage(); // Utilizes RNG to add messages to each node to simulate messages added from external sources.
 	SST::Link *nextPort; // Pointer to queue port

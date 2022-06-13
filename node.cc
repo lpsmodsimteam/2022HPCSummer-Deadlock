@@ -42,14 +42,14 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	registerClock(clock, new SST::Clock::Handler<node>(this, &node::tick));
 	
 	// Configure the port for receiving a message from a node.
-	nextPort = configureLink("nextPort", new SST::Event::Handler<node>(this, &node::testMsgEvent));
+	nextPort = configureLink("nextPort", new SST::Event::Handler<node>(this, &node::handleEvent));
 	// Check if port exist. Error out if not
 	if ( !nextPort ) {
 		output.fatal(CALL_INFO, -1, "Failed to configure port 'nextPort'\n");
 	}
 
 	// Configure our port for returning credit information to a node.
-	prevPort = configureLink("prevPort", new SST::Event::Handler<node>(this, &node::testMsgEvent));
+	prevPort = configureLink("prevPort", new SST::Event::Handler<node>(this, &node::handleEvent));
 	// Check if port exist. Error out if not
 	if ( !prevPort ) {
 		output.fatal(CALL_INFO, -1, "Failed to configure port 'prevPort'\n");
@@ -94,60 +94,26 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	// and if the node has messages in its queue to send.
 	if (queueCredits > 0 && queueCurrSize > 0) {
 
-		output.output(CALL_INFO, "Sending Message\n");
+		//output.output(CALL_INFO, "Sending Message\n");
 		sendMessage();
 	}
 
 	// Send credits back to previous node.
-	sendCreditsMsg();
+	sendCredits();
 	return(false);
 }
 
-/**
-// Receive message from node.
-void node::recvEvent(SST::Event *ev) {
-	// StringEvent is unnecessary 
-	queueCurrSize++; // Increment queue size.
-	delete ev;
-
-}
-
-// Receive # of credits from node.
-void node::creditEvent(SST::Event *ev) {
-	StringEvent *se = dynamic_cast<StringEvent*>(ev);
-	if ( se != NULL ) {
-		queueCredits = atoi(&(se->getString().c_str()[0]));
-	}
-	delete ev;
-}
-**/
-
 void node::handleEvent(SST::Event *ev) {
-	StringEvent *se = dynamic_cast<StringEvent*>(ev);
-	if ( se != NULL ) {
-		// Check if the event is from a node sending a message.
-		if (se->getString().compare("Sending") == 0) {
-			queueCurrSize++; // Increment queue size.
-		} else {
-			// Otherwise the node is receiving credit information from the next node it's connected to.
-			queueCredits = atoi(&(se->getString().c_str()[0]));
-		}
-	}
-
-	delete ev;
-}
-
-void node::testMsgEvent(SST::Event *ev) {
 	BaseMessageEvent *me = dynamic_cast<BaseMessageEvent*>(ev);
 	if ( me != NULL ) {
 		switch (me->msg.type)
 		{
 			case MESSAGE:
-				std::cout << getName() << " is receiving a message from " << me->msg.source_node << std::endl;
+				//std::cout << getName() << " is receiving a message from " << me->msg.source_node << std::endl;
 				queueCurrSize++;
 				break;
 			case CREDIT:
-				std::cout << getName() << " is receiving # of credits from " << me->msg.source_node << std::endl;
+				//std::cout << getName() << " is receiving # of credits from " << me->msg.source_node << std::endl;
 				queueCredits = me->msg.credits;
 				break;
 			case STATUS:
@@ -156,7 +122,7 @@ void node::testMsgEvent(SST::Event *ev) {
 				// If the message originated from the same node, the status message has looped through
 				// the ring of nodes back to its original sender.
 				if (me->msg.source_node == getName()) {
-					std::cout << getName() << " received a message from itself!" << std::endl;
+					//std::cout << getName() << " received a message from itself!" << std::endl;
 					// If the status is sending, a node in the ring can still send messages so a deadlock
 					// has not occured.
 					if (me->msg.status == SENDING) {
@@ -169,7 +135,7 @@ void node::testMsgEvent(SST::Event *ev) {
 						exit.execute();
 					}
 				} else { 
-					std::cout << getName() << " is pinged with a status from " << me->msg.source_node << std::endl;
+					//std::cout << getName() << " is pinged with a status from " << me->msg.source_node << std::endl;
 					// The node receives a status message from another node.
 					// Two situations can happen here:
 
@@ -211,13 +177,8 @@ void node::testMsgEvent(SST::Event *ev) {
 		
 	}
 }
-/**
-// Simulate sending a single message out to linked component in composition.
-void node::sendMessage() {
-	queueCurrSize--; 
-	nextPort->send(new StringEvent("Sending"));
-} */
 
+// Simulate sending a single message out to linked component in composition.
 void node::sendMessage() {
 	queueCurrSize--; 
 	MessageTypes type = MESSAGE;
@@ -228,12 +189,7 @@ void node::sendMessage() {
 	nextPort->send(new BaseMessageEvent(msg));
 }
 
-// Send # of slots in queue to previous connected node.
 void node::sendCredits() {
-	prevPort->send(new StringEvent(std::to_string(queueMaxSize - queueCurrSize)));
-}
-
-void node::sendCreditsMsg() {
 	MessageTypes type = CREDIT;
 	StatusTypes status = SENDING;
 	int numCredits = queueMaxSize - queueCurrSize;
