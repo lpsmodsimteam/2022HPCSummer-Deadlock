@@ -3,3 +3,6 @@
 *.so
 *.png
 *.dot
+*.bak
+*.TAG
+*.json

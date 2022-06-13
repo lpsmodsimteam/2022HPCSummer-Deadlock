@@ -1,5 +1,5 @@
 # Tell Make that these are NOT files, just targets
-.PHONY: all install test uninstall clean sst-info sst-help viz_makefile viz_dot black help 
+.PHONY: all install test uninstall clean sst-info sst-help viz_makefile viz_dot black mypy help 
 
 # shortcut for running anything inside the singularity container
 CONTAINER=/usr/local/bin/additions.sif
@@ -46,7 +46,7 @@ install: $(CONTAINER) ~/.sst/sstsimulator.conf lib$(PACKAGE).so
 	$(SINGULARITY) sst-register $(PACKAGE) $(PACKAGE)_LIBDIR=$(CURDIR)
 
 # Run the tests for the model
-test: $(CONTAINER) install
+test: $(CONTAINER) install black mypy
 	$(SINGULARITY) sst tests/deadlock.py
 
 # Unregister the model with SST
@@ -74,6 +74,9 @@ viz_dot: $(CONTAINER) install
 
 black: $(CONTAINER)
 	$(SINGULARITY) black tests/*.py
+
+mypy: $(CONTAINER)
+	$(SINGULARITY) mypy tests/*.py
 
 help:
 	@echo "Target     | Description"

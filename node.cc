@@ -202,8 +202,8 @@ void node::addMessage() {
 	queueCurrSize += rndNumber; // Add messages to queue.
 }
 
-Message node::constructMsg(std::string source_node, MessageTypes type, StatusTypes status, int numCredits) {
-	Message msg = { source_node, type, status, numCredits };
+struct Message node::constructMsg(std::string source_node, MessageTypes type, StatusTypes status, int numCredits) {
+	struct Message msg = { source_node, type, status, numCredits };
 	return msg;
 }
 

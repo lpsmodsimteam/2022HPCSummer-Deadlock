@@ -9,6 +9,27 @@
 #define QUEUE_NOT_FULL 0
 #define QUEUE_FULL 1
 
+// Message Types
+enum MessageTypes {
+	CREDIT,
+	MESSAGE,
+	STATUS,
+};
+
+// Status types
+enum StatusTypes {
+	SENDING,
+	WAITING,
+};
+
+// Struct for a Message
+struct Message {
+	std::string source_node;
+	MessageTypes type;
+	StatusTypes status;
+	int credits;
+};
+
 class node : public SST::Component {
 
 public: 
@@ -52,32 +73,11 @@ private:
 	void sendMessage(); // Sends a single message across a link from one node to a connected nodes queue.
 	void sendCredits(); // Sends number of credits to previous node in circular list.
 	void addMessage(); // Utilizes RNG to add messages to each node to simulate messages added from external sources.
-	Message constructMsg(std::string source_node, MessageTypes type, StatusTypes status, int numCredits);
+	struct Message constructMsg(std::string source_node, MessageTypes type, StatusTypes status, int numCredits);
 	SST::Link *nextPort; // Pointer to queue port
 	SST::Link *prevPort; // Pointer to port that will send # of credits to previous node.
 
 	std::string clock; // Defining a clock which can be described via unit math as a string (?).
-};
-
-// Message Types
-enum MessageTypes {
-	CREDIT,
-	MESSAGE,
-	STATUS,
-};
-
-// Status types
-enum StatusTypes {
-	SENDING,
-	WAITING,
-};
-
-// Struct for a Message
-struct Message {
-	std::string source_node;
-	MessageTypes type;
-	StatusTypes status;
-	int credits;
 };
 
 class MessageEvent : public SST::Event {
