@@ -4,6 +4,7 @@
 #include <sst/core/component.h>
 #include <sst/core/link.h>
 #include <sst/core/rng/marsaglia.h>
+#include <sst/core/event.h>
 
 #define QUEUE_NOT_FULL 0
 #define QUEUE_FULL 1
@@ -19,6 +20,7 @@ public:
 	void recvEvent(SST::Event *ev);
 	void creditEvent(SST::Event *ev);
 	void handleEvent(SST::Event *ev);
+	void testMsgEvent(SST::Event *ev);
 	
 	// Register the component for lookup via sst-info
 	SST_ELI_REGISTER_COMPONENT(
@@ -50,6 +52,7 @@ private:
 	SST::RNG::MarsagliaRNG *rng; //
 
 	void sendMessage(); // Sends a single message across a link from one node to a connected nodes queue.
+	void sendCreditsMsg();
 	void sendCredits(); // Sends number of credits to previous node in circular list.
 	void addMessage(); // Utilizes RNG to add messages to each node to simulate messages added from external sources.
 	SST::Link *nextPort; // Pointer to queue port
@@ -57,5 +60,52 @@ private:
 
 	std::string clock; // Defining a clock which can be described via unit math as a string (?).
 };
+
+// Message Types
+enum MessageTypes {
+	CREDIT,
+	MESSAGE,
+	STATUS,
+};
+
+enum StatusTypes {
+	SENDING,
+	WAITING,
+};
+
+// Struct for a message
+struct Message {
+	std::string source_node;
+	MessageTypes type;
+	StatusTypes status;
+	int credits;
+};
+
+class BaseMessageEvent : public SST::Event {
+
+public:
+	// 
+	void serialize_order(SST::Core::Serialization::serializer &ser) override {
+		Event::serialize_order(ser);
+		ser & msg.source_node;
+		ser & msg.type;
+		ser & msg.credits;
+	}
+
+	//
+	BaseMessageEvent(Message msg) :
+		Event(),
+		msg(msg)
+	{}
+
+	//
+	BaseMessageEvent() {} // For Serialization only
+
+	// MessageEventType type;
+	Message msg; 
+
+	ImplementSerializable(BaseMessageEvent); //
+};
+
 
 #endif

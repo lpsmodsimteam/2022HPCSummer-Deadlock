@@ -1,8 +1,8 @@
 # Tell Make that these are NOT files, just targets
-.PHONY: all install test uninstall clean sst-info sst-help help
+.PHONY: all install png test uninstall clean sst-info sst-help viz_Makefile help 
 
 # shortcut for running anything inside the singularity container
-CONTAINER=/usr/local/bin/sstpackage-11.1.0-ubuntu-20.04.sif
+CONTAINER=/usr/local/bin/additions.sif
 SINGULARITY=singularity exec $(CONTAINER)
 
 # SST environment variables (gathered from the singularity container)
@@ -47,6 +47,11 @@ lib$(PACKAGE).so: $(OBJ)
 install: $(CONTAINER) ~/.sst/sstsimulator.conf lib$(PACKAGE).so
 	$(SINGULARITY) sst-register $(PACKAGE) $(PACKAGE)_LIBDIR=$(CURDIR)
 
+# Run the tests for the model and output a dot file which is converted to a png file.
+png: $(CONTAINER) install
+	$(SINGULARITY) sst tests/$(PACKAGE).py --output-dot=$(PACKAGE).dot --dot-verbosity=6
+	$(SINGULARITY) dot -Tpng $(PACKAGE).dot $(PACKAGE).png
+
 # Run the tests for the model
 test: $(CONTAINER) install
 	$(SINGULARITY) sst tests/deadlock.py
@@ -65,8 +70,9 @@ sst-info: $(CONTAINER)
 sst-help: $(CONTAINER)
 	$(SINGULARITY) sst --help
 
-viz_Makefile:
-	makefile2dot | dot -Tpng > Makefile_viz.png
+viz_Makefile: $(CONTAINER)
+	$(SINGULARITY) makefile2dot --output $(PACKAGE)makefile.dot
+	$(SINGULARITY) dot -Tpng $(PACKAGE)makefile.dot > Makefile_viz.png
 
 help:
 	@echo "Target     | Description"
