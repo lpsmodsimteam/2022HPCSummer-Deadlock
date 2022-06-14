@@ -67,7 +67,6 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	output.output(CALL_INFO, "Amount of credits: %d\n", queueCredits);
 	std::cout << "Sim-Time: " << getCurrentSimTimeNano() << std::endl;
 
-
 	// Checking if no credits are available.
 	if ( queueCredits <= 0 ) {
 		// If the node has no credits, it is idling. Send out a status message to check for deadlock.
@@ -86,9 +85,11 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	
 
 	// Rng and collect messages and add to queue size.
-	if (queueCurrSize < queueMaxSize) {
-		addMessage();
+	if (queueCurrSize <= queueMaxSize) {
+		queueCurrSize++;
 	}
+
+	sendCredits();
 
 	// Send a message out every tick if the next nodes queue is not full,
 	// AND if the node has messages in its queue to send.
