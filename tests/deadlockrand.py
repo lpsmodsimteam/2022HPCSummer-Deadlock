@@ -1,7 +1,7 @@
 import sst
 import random
 
-NUM_NODES = 5
+NUM_NODES = 4
 QUEUE_MIN_SIZE = 30
 QUEUE_MAX_SIZE = 50
 TICK_MIN_FREQ = 5
@@ -18,6 +18,8 @@ for x in range(NUM_NODES):
         }
     )
 
+# "queueMaxSize": f"{random.randint(QUEUE_MIN_SIZE, QUEUE_MAX_SIZE)}",
+#            "tickFreq": f"{random.randint(TICK_MIN_FREQ, TICK_MAX_FREQ)}s",
 
 for x in range(NUM_NODES - 1):
     sst.Link(f"Link_{x}").connect(

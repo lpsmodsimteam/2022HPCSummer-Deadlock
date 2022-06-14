@@ -20,7 +20,7 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	// Get parameters
 	queueMaxSize = params.find<int64_t>("queueMaxSize", 50);
 	clock = params.find<std::string>("tickFreq", "10s");
-	randSeed = params.find<int64_t>("randseed", 112233);
+	randSeed = params.find<int64_t>("randseed", 445566);
 
 	// Initialize Variables
 	queueCurrSize = 0;
@@ -42,7 +42,7 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	
 	// Configure the port for receiving a message from a node.
 	nextPort = configureLink("nextPort", new SST::Event::Handler<node>(this, &node::handleEvent));
-	// Check if port exist. Error out if not
+	// Check if port exist. Error out if not3.9.9
 	if ( !nextPort ) {
 		output.fatal(CALL_INFO, -1, "Failed to configure port 'nextPort'\n");
 	}
@@ -60,12 +60,27 @@ node::~node() {
 
 }
 
+
+void node::setup() {
+	MessageTypes type = CREDIT;
+	StatusTypes status = SENDING;
+	int numCredits = queueMaxSize - queueCurrSize;
+	struct Message msg = { getName(), type, status, numCredits };
+	prevPort->send(new MessageEvent(msg));
+}
+
+void node::finish() {
+	std::cout << getName() << " final queue size: " << queueCurrSize << ". Max queue size is: " << queueMaxSize << std::endl;
+	std::cout << getName() << " final credit size: " << queueCredits << std::endl;
+}
+
+
 // Runs every clock tick
 bool node::tick( SST::Cycle_t currentCycle ) {
 	// Replace with output
+	output.output(CALL_INFO, "Sim-Time: %lu--------------------------\n", getCurrentSimTimeNano());
 	output.output(CALL_INFO, "Size of queue: %d\n", queueCurrSize);
 	output.output(CALL_INFO, "Amount of credits: %d\n", queueCredits);
-	std::cout << "Sim-Time: " << getCurrentSimTimeNano() << std::endl;
 
 	// Checking if no credits are available.
 	if ( queueCredits <= 0 ) {
@@ -85,21 +100,22 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	
 
 	// Rng and collect messages and add to queue size.
-	if (queueCurrSize <= queueMaxSize) {
-		queueCurrSize++;
+	if (queueCurrSize < queueMaxSize) {
+		output.output(CALL_INFO, "Adding a message");
+		addMessage();
+		std::cout << " queue curr size is now " << queueCurrSize << std::endl;
+		sendCredits();
 	}
-
-	sendCredits();
 
 	// Send a message out every tick if the next nodes queue is not full,
 	// AND if the node has messages in its queue to send.
 	if (queueCredits > 0 && queueCurrSize > 0) {
-		//output.output(CALL_INFO, "Sending Message\n");
+		output.output(CALL_INFO, "Sending a message. Queue size is now %d\n", queueCurrSize - 1);
 		sendMessage();
+		sendCredits();
 	}
 
 	// Send credits back to previous node.
-	sendCredits();
 	return(false);
 }
 
@@ -111,6 +127,7 @@ void node::handleEvent(SST::Event *ev) {
 			case MESSAGE:
 				//std::cout << getName() << " is receiving a message from " << me->msg.source_node << std::endl;
 				queueCurrSize++;
+				sendCredits();
 				break;
 			case CREDIT:
 				//std::cout << getName() << " is receiving # of credits from " << me->msg.source_node << std::endl;
@@ -124,6 +141,7 @@ void node::handleEvent(SST::Event *ev) {
 				if (me->msg.source_node == getName()) {
 					// All nodes in the ring have status WAITING, a deadlock has occured.
 					if (me->msg.status == WAITING) {
+						std::cout << getName() << " detected a deadlock. Ending simulation." << std::endl;
 						SST::StopAction exit;
 						exit.execute();
 					}
@@ -134,6 +152,8 @@ void node::handleEvent(SST::Event *ev) {
 
 					// 1. The node receives the status SENDING. A node in the ring can still send messages.
 					// 	  In this case the current node sends along the status SENDING.
+
+					//this is not needed. refactor
 						if (me->msg.status == SENDING) {
 							MessageTypes type = STATUS;
 							StatusTypes status = SENDING;
@@ -146,13 +166,16 @@ void node::handleEvent(SST::Event *ev) {
 					//	  The current node determines if it can send or if its waiting as well and updates the status before passing the message along.
 						else if (me->msg.status == WAITING) {
 							if (queueCredits <= 0) {
-								// The message needs to be reconstructed before sending out.
+								// The node cannot send out any messages so it passes the WAITING status forward.
 								MessageTypes type = STATUS;
 								StatusTypes status = WAITING;
 								int numCredits = me->msg.credits;
 								struct Message msg = { me->msg.source_node, type, status, numCredits };
 								nextPort->send(new MessageEvent(msg));
 							} else {
+								// The node can still send messages so it discards the STATUS message from the ring.
+
+								//this is not needed. refactor
 								MessageTypes type = STATUS;
 								StatusTypes status = SENDING;
 								int numCredits = me->msg.credits;
@@ -186,6 +209,7 @@ void node::sendMessage() {
 // Send number of credits left to the previous node.
 void node::sendCredits() {
 	// Construct credit message to send.
+	output.output(CALL_INFO, "Sending credits\n");
 	MessageTypes type = CREDIT;
 	StatusTypes status = SENDING;
 	int numCredits = queueMaxSize - queueCurrSize;
@@ -198,8 +222,8 @@ void node::addMessage() {
 	int rndNumber;
 	rndNumber = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
 	//rndNumber = (rndNumber & 0x0000FFFF) ^ ((rndNumber & 0xFFFF0000) >> 16); // XOR the upper 16 bits with the lower 16 bits.
-	rndNumber = abs((int)(rndNumber % 3)); // Generate a integer 0-2.
-
+	rndNumber = abs((int)(rndNumber % 2)); // Generate a integer 0-1.
+	std::cout << " of size " << rndNumber;;
 	queueCurrSize += rndNumber; // Add messages to queue.
 }
 

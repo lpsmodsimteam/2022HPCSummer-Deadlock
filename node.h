@@ -36,6 +36,9 @@ public:
 	node( SST::ComponentId_t id, SST::Params& params ); // Constructor
 	~node(); // Deconstructor
 
+	void setup(); // setup phase
+	void finish(); // finish phase
+
 	bool tick( SST::Cycle_t currentCycle); 
 
 	void handleEvent(SST::Event *ev);
