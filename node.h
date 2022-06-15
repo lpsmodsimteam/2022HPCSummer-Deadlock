@@ -70,6 +70,7 @@ private:
 	int queueMaxSize; // Max size of nodes queue.
 	int queueCurrSize; // Current size of nodes queue.
 	int queueCredits; // Amount of space left in the next linked nodes queue. 
+	int receiving; // Mutex when node is receiving a message.
 	int64_t randSeed; // Seed for MarsagliaRNG
 	SST::RNG::MarsagliaRNG *rng; //
 

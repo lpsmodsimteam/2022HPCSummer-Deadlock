@@ -26,6 +26,8 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	queueCurrSize = 0;
 	queueCredits = 1; // Arbitrary non-zero number since this will be overwritten after the first tick.
 
+
+
 	// Initialize Random
 	rng = new SST::RNG::MarsagliaRNG(10, randSeed); // Create a Marsaglia RNG with a default value and a random seed.
 
@@ -83,7 +85,7 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	output.output(CALL_INFO, "Amount of credits: %d\n", queueCredits);
 
 	// Checking if no credits are available.
-	if ( queueCredits <= 0 ) {
+	if ( queueCredits == 0 ) {
 		// If the node has no credits, it is idling. Send out a status message to check for deadlock.
 		output.output(CALL_INFO, "Status Check\n");
 
@@ -97,13 +99,12 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 		//primaryComponentOKToEndSim();
 		//return(true);
 	}
-	
+	sendCredits();
 
 	// Rng and collect messages and add to queue size.
-	if (queueCurrSize < queueMaxSize) {
+	if (receiving != 1 && (queueCurrSize < queueMaxSize)) {
 		output.output(CALL_INFO, "Adding a message");
 		addMessage();
-		std::cout << " queue curr size is now " << queueCurrSize << std::endl;
 		sendCredits();
 	}
 
@@ -111,7 +112,7 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 	// AND if the node has messages in its queue to send.
 	if (queueCredits > 0 && queueCurrSize > 0) {
 		output.output(CALL_INFO, "Sending a message. Queue size is now %d\n", queueCurrSize - 1);
-		sendMessage();
+		sendMessage(); // Send message out of queue.
 		sendCredits();
 	}
 
@@ -125,9 +126,12 @@ void node::handleEvent(SST::Event *ev) {
 		switch (me->msg.type)
 		{
 			case MESSAGE:
-				//std::cout << getName() << " is receiving a message from " << me->msg.source_node << std::endl;
-				queueCurrSize++;
+				receiving = 1;
+				std::cout << getName() << " is receiving a message from " << me->msg.source_node << std::endl;
+				queueCurrSize++; // Message is added to nodes queue.
+				std::cout << getName() << " queue size is now " << queueCurrSize << std::endl;
 				sendCredits();
+				receiving = 0;
 				break;
 			case CREDIT:
 				//std::cout << getName() << " is receiving # of credits from " << me->msg.source_node << std::endl;
@@ -223,8 +227,16 @@ void node::addMessage() {
 	rndNumber = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
 	//rndNumber = (rndNumber & 0x0000FFFF) ^ ((rndNumber & 0xFFFF0000) >> 16); // XOR the upper 16 bits with the lower 16 bits.
 	rndNumber = abs((int)(rndNumber % 2)); // Generate a integer 0-1.
-	std::cout << " of size " << rndNumber;;
-	queueCurrSize += rndNumber; // Add messages to queue.
+	std::cout << " of size " << rndNumber << std::endl;
+	//queueCurrSize += rndNumber; // Add messages to queue.
+	if (rndNumber && queueCredits > 0) {
+		MessageTypes type = MESSAGE;
+		StatusTypes status = SENDING;
+		int numCredits = queueMaxSize - queueCurrSize;
+		struct Message msg = { getName(), type, status, numCredits };
+
+		nextPort->send(new MessageEvent(msg));
+	}
 }
 
 struct Message node::constructMsg(std::string source_node, MessageTypes type, StatusTypes status, int numCredits) {

@@ -1,7 +1,7 @@
 import sst
 import random
 
-NUM_NODES = 4
+NUM_NODES = 5
 QUEUE_MIN_SIZE = 30
 QUEUE_MAX_SIZE = 50
 TICK_MIN_FREQ = 5
