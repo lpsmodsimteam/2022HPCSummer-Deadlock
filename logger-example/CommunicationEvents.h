@@ -30,6 +30,7 @@ struct Log {
 	int idle_time;
 	int node_status;
 	int num_requests;
+	int node_id;
 };
 
 // Custom event type that handles Message structures.

@@ -147,7 +147,8 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 
 	generated = 0;
 
-	// Send credits back to previous node.
+	sendLog();
+
 	return(false);
 }
 
@@ -232,6 +233,12 @@ void node::sendCredits() {
 	output.verbose(CALL_INFO, 2, 0, "Sending credits\n");
 	struct CreditProbe creds = { queueMaxSize - (int)msgqueue.size() };
 	prevPort->send(new CreditEvent(creds));
+}
+
+void node::sendLog() {
+	output.verbose(CALL_INFO, 2, 0, "Sending log data\n");
+	struct Log log = { idle_duration, node_state, block_requests, node_id };
+	logPort->send(new LogEvent(log));
 }
 
 // Simulation purposes, generate messages randomly and send to next node.

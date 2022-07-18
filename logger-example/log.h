@@ -40,12 +40,16 @@ public:
 
 private:
     SST::Output output;
+    SST::Output csvout;
 
     SST::Link **port;
 
     std::string clock;
     int num_ports;
     
+    int *stateArray;
+    int *idleArray;
+    int *requestArray;
 };
 
 #endif
