@@ -23,6 +23,8 @@ public:
 	void messageHandler(SST::Event *ev); // Handles incoming messages and status messages. Determines if a message should be
 										 // consumed or added to the node's queue.
 	void creditHandler(SST::Event *ev);	// Handles credit information from connected nodes.
+	
+	void logHandler(SST::Event *ev);
 
 	int generated; // Lock so that if a node generates a message it will not also send out a message from its queue as well in one tick.
 
@@ -30,7 +32,7 @@ public:
 	// Register the component for lookup via sst-info
 	SST_ELI_REGISTER_COMPONENT(
 		node, // class
-		"deadlock", // element library
+		"deadlocklog", // element library
 		"node", // component
 		SST_ELI_ELEMENT_VERSION( 1, 0, 0 ), // current element version
 		"nodes that send and receive data circularly. Used to demonstrate a communication deadlock.", // description of component.
@@ -48,14 +50,12 @@ public:
 	// Port name, description, event type
 	SST_ELI_DOCUMENT_PORTS(
 		{"nextPort", "Port which receives credit probe from the next node.", {"MessageEvent"}},
-		{"prevPort", "Port which receives Message info from previous node.", {"CreditEvent"}}
-	)
+		{"prevPort", "Port which receives Message info from previous node.", {"CreditEvent"}},
+		{"logPort", "Port which sends out logging info to logger node", {"LogEvent"}},
+	)	
 
-	/**SST_ELI_DOCUMENT_STATISTICS(
-		{"idleTime", "Time spent not sending messages", "ticks", 1},
-		{"blockRequests", "Amount of times a node has attempted to send a message", "ticks", 1},
-		{"messagesSent", "Amount of messages sent from a node", "messages", "1"},
-	)*/
+
+
 
 private:
 	SST::Output output; // SST Output object for printing to console synchronously (?)
@@ -75,18 +75,16 @@ private:
 	void sendCredits(); // Sends number of credits to previous node in circular list.
 	void addMessage(); // Utilizes RNG to create a message and send it out from a node.
 
-	SST::Link *nextPort; // Pointer to queue port
+	SST::Link *nextPort; // Pointer to queue port.
 	SST::Link *prevPort; // Pointer to port that will send # of credits to previous node.
+	SST::Link *logPort;  // Pointer to port that will send log info to logger node.
 
 	std::string clock; // Node's clock which accepts unit math as a string.
 
 	bool node_state; // Determines what state the node is in. 
 	int idle_duration; // Captures the duration the time has been idle.
 	int block_requests; // Amount of times the node has attempted to send a message to a node connected to it.
-
-	/**Statistic<uint32_t>* idleTime;
-	Statistic<uint32_t>* blockRequests;
-	Statistic<uint32_t>* messagesSent;*/
+	
 };
 
 #endif

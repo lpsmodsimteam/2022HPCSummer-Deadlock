@@ -3,7 +3,7 @@ import sst
 TOTAL_NODES = 3
 
 # Component node from element deadlock (deadlock.node), named "node_one"
-node_zero = sst.Component("Node 0", "deadlock.node")
+node_zero = sst.Component("Node 0", "deadlocklog.node")
 node_zero.addParams(
     {
         "queueMaxSize": "120",  # max message queue size.
@@ -13,7 +13,7 @@ node_zero.addParams(
     }
 )
 
-node_one = sst.Component("Node 1", "deadlock.node")
+node_one = sst.Component("Node 1", "deadlocklog.node")
 node_one.addParams(
     {
         "queueMaxSize": "100",
@@ -23,13 +23,22 @@ node_one.addParams(
     }
 )
 
-node_two = sst.Component("Node 2", "deadlock.node")
+node_two = sst.Component("Node 2", "deadlocklog.node")
 node_two.addParams(
     {
         "queueMaxSize": "80",
         "tickFreq": "2ms",
         "id": "2",
         "total_nodes": f"{TOTAL_NODES}",
+    }
+)
+
+
+node_log = sst.Component("Logger", "deadlocklog.log")
+node_log.addParams(
+    {
+        "tickFreq": "1ms",
+        "num_nodes": f"{TOTAL_NODES}",
     }
 )
 
@@ -42,4 +51,17 @@ sst.Link("Message_Link_One").connect(
 )
 sst.Link("Message_Link_Two").connect(
     (node_two, "nextPort", "1ms"), (node_zero, "prevPort", "1ms")
+)
+
+# Connect the nodes to the logger.
+sst.Link("Log_Link_Zero").connect(
+    (node_zero, "logPort", "1ps"), (node_log, "port0", "1ps")
+)
+
+sst.Link("Log_Link_One").connect(
+    (node_one, "logPort", "1ps"), (node_log, "port1", "1ps")
+)
+
+sst.Link("Log_Link_Two").connect(
+    (node_two, "logPort", "1ps"), (node_log, "port2", "1ps")
 )

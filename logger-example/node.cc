@@ -37,12 +37,6 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	// Initialize Random
 	rng = new SST::RNG::MarsagliaRNG(10, randSeed); // Create a Marsaglia RNG with a default value and a random seed.
 
-	// Register the node as a primary component.
-	// Then declare that the simulation cannot end until this 
-	// primary component declares primaryComponentOKToEndSim();
-	registerAsPrimaryComponent(); 
-	primaryComponentDoNotEndSim();
-
 	// Set Main Clock
 	// Handler object is created with a reference to this object and a pointer to
 	// a function that is called on every clock tick event (?).
@@ -55,11 +49,17 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 		output.fatal(CALL_INFO, -1, "Failed to configure port 'nextPort'\n");
 	}
 
-	// Configure our port for returning credit information to a node.
+	// Configure the port for returning credit information to a node.
 	prevPort = configureLink("prevPort", new SST::Event::Handler<node>(this, &node::messageHandler));
 	// Check if port exist. Error out if not.
 	if ( !prevPort ) {
 		output.fatal(CALL_INFO, -1, "Failed to configure port 'prevPort'\n");
+	}
+
+	// Configure the port for sending log info to logger node.
+	logPort = configureLink("logPort", new SST::Event::Handler<node>(this, &node::logHandler));
+	if ( !logPort ) {
+		output.fatal(CALL_INFO, -1, "Failed to configure port 'logPort'\n");
 	}
 }
 
@@ -202,6 +202,13 @@ void node::messageHandler(SST::Event *ev) {
 		}
 	}
 	delete ev; // Clean up event to prevent memory leaks.
+}
+
+
+
+void node::logHandler( SST::Event *ev ) {
+	output.fatal(CALL_INFO, -1, "Node should not be receiving logging info from logger node. Error!");
+	delete ev;
 }
 
 void node::creditHandler(SST::Event *ev) {

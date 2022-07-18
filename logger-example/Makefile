@@ -16,7 +16,7 @@ OBJ=$(SRC:%.cc=.build/%.o)
 DEP=$(OBJ:%.o=%.d)
 
 # Name of the library we will be working with
-PACKAGE=deadlock
+PACKAGE=deadlocklog
 
 # Simply typing "make" calls this by default, so everything gets built and installed
 all: test
@@ -47,7 +47,7 @@ install: $(CONTAINER) ~/.sst/sstsimulator.conf lib$(PACKAGE).so
 
 # Run the tests for the model
 test: $(CONTAINER) install black mypy
-	$(SINGULARITY) sst tests/deadlockrand.py
+	$(SINGULARITY) sst tests/deadlock.py
 
 # Unregister the model with SST
 uninstall: $(CONTAINER) ~/.sst/sstsimulator.conf
