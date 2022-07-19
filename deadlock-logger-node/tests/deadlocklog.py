@@ -38,7 +38,7 @@ node_log = sst.Component("Logger", "deadlocklog.log")
 node_log.addParams(
     {
         "tickFreq": "1ms",
-        "num_nodes": f"{TOTAL_NODES}",
+        "num_nodes": f"{TOTAL_NODES}",  # This should be equal to the total number of node components to behave properly.
     }
 )
 
