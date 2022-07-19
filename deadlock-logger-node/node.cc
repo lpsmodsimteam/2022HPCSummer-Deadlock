@@ -1,3 +1,4 @@
+/// \file
 /**
    Simulation of a communication deadlock occuring in a ring topology network of nodes.
  */
@@ -5,8 +6,7 @@
 #include <sst/core/sst_config.h> 
 #include <sst/core/simulation.h>
 #include <sst/core/stopAction.h>
-#include <queue>
-#include "node.h" // Element header file.
+#include "node.h" 
 
 //TODO
 /*	

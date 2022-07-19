@@ -1,3 +1,4 @@
+/// \file
 #include <sst/core/sst_config.h>
 #include <sst/core/simulation.h>
 #include "log.h"
@@ -39,7 +40,7 @@ log::~log() {
 }
 
 void log::setup() {
-    safe_to_end = 0;
+    deadlocked = false;
     idleArray = (int*) calloc(num_ports, sizeof(int)); 
     stateArray = (int*) calloc(num_ports, sizeof(int)); 
     requestArray = (int*) calloc(num_ports, sizeof(int)); 
@@ -54,14 +55,14 @@ bool log::tick( SST::Cycle_t currentCycle ) {
 
     for(int i = 0; i < num_ports; ++i) {
         if (stateArray[i] == 0 && idleArray[i] > 50 && requestArray[i] > 50) {
-            safe_to_end = 1;
+            deadlocked = true;
         } else {
-            safe_to_end = 0;
+            deadlocked = false;
             break;
         }
     }
 
-    if (safe_to_end) {
+    if (deadlocked) {
         output.output(CALL_INFO, "Detected Deadlock. Ending Simulation.\n");
         primaryComponentOKToEndSim();
     }

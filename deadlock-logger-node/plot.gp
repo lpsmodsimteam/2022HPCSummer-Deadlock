@@ -1,8 +1,8 @@
 # To use:
 #
-# Run simulator once to generate receiver_data.csv and sender_data[i].csv files.
+# Run simulator once to generate a log_data.csv file.
 # 
-# Make sure that plot.gp is in the same folder as the files mentioned above.
+# Make sure that plot.gp is in the same folder as the file mentioned above.
 #
 # Run gnuplot plot.gp
 
