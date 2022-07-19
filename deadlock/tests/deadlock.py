@@ -1,15 +1,17 @@
-import sst
+import sst  # Use SST library
 
-TOTAL_NODES = 3
+TOTAL_NODES = 3  # Total nodes in the simulation.
 
-# Component node from element deadlock (deadlock.node), named "node_one"
+# Creating a node component from element deadlock (deadlock.node) named "Node 0".
 node_zero = sst.Component("Node 0", "deadlock.node")
+
+# Add parameters to node_zero
 node_zero.addParams(
     {
         "queueMaxSize": "120",  # max message queue size.
-        "tickFreq": "3ms",  # simulated time node runs at.
-        "id": "0",  # id of node
-        "total_nodes": f"{TOTAL_NODES}",  # total nodes in simulation
+        "tickFreq": "3ms",  # frequency node updates at.
+        "id": "0",  # id of node.
+        "total_nodes": f"{TOTAL_NODES}",  # total nodes in simulation.
     }
 )
 
