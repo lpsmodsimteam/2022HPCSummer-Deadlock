@@ -1,3 +1,4 @@
+/// \file
 #ifndef communication_H
 #define communication_H
 #include <sst/core/event.h>

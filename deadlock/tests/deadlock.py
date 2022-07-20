@@ -1,3 +1,5 @@
+# Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
+
 import sst  # Use SST library
 
 TOTAL_NODES = 3  # Total nodes in the simulation.
