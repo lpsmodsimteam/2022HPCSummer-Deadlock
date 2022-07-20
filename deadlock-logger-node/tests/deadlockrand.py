@@ -1,3 +1,5 @@
+# Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
+
 import sst
 import random
 
