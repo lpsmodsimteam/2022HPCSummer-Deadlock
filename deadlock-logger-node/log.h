@@ -94,6 +94,7 @@ private:
     int num_ports; //!< Number of ports that the logger node has.
     
     int *stateArray; //!< Pointer to data for each node's current state.
+    int *stateChanges; //!< Pointer to data for how many times each node has changed states.
     int *idleArray; //!< Pointer to data for each node's time idle.
     int *requestArray; //!< Pointer to data for each node's number of requests to send a message.
 

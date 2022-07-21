@@ -16,14 +16,15 @@ set offset graph 0,0.1,0.1,0
 set multiplot layout 2,2 title "Deadlock"
 
     set title "Node Idle" 
-    plot "log_data.csv" using 1:4 every 3 with lines 
+    #plot "log_data.csv" using 1:4 every 3 with lines  
+    plot for [i=1:ARG1] "log_data.csv" using 1:4 every ARG1::i with lines
 
     set title "Node Status"
-    plot "log_data.csv" using 1:3 every 3 with lines 
+    #plot "log_data.csv" using 1:3 every 3 with lines 
+    plot for [i=1:ARG1] "log_data.csv" using 1:3 every ARG1::i with lines
 
     set title "Number of Request"
-    plot "log_data.csv" using 1:5 every 3 with lines 
+    #plot "log_data.csv" using 1:5 every 3 with lines 
 
-
-    #plot for [i=1:ARG1] "log_data.csv" using 1:5 every i::ARG1 with lines
+    plot for [i=1:ARG1] "log_data.csv" using 1:5 every ARG1::i with lines
 unset multiplot

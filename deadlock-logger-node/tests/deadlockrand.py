@@ -3,7 +3,7 @@
 import sst
 import random
 
-NUM_NODES = 5  # Number of nodes
+NUM_NODES = 3  # Number of nodes
 
 # Node parameters are randomly generated between the two ranges for queue size and tick frequency.
 QUEUE_MIN_SIZE = 80  # Minimum possible queue size
@@ -24,6 +24,7 @@ for x in range(NUM_NODES):
             "tickFreq": f"{random.randint(TICK_MIN_FREQ, TICK_MAX_FREQ)}ms",
             "id": f"{x}",
             "total_nodes": f"{NUM_NODES}",
+            "message_gen": "0.75",
         }
     )
 

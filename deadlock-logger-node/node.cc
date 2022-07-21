@@ -28,6 +28,7 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	randSeed = params.find<int64_t>("randseed", 121212);
 	node_id = params.find<int64_t>("id", 1);
 	total_nodes = params.find<int64_t>("total_nodes", 5);
+	message_gen = params.find<float>("message_gen", 0.5);
 
 	// Initialize Variables
 	queueCurrSize = 0;
@@ -241,17 +242,16 @@ void node::sendLog() {
 
 // Simulation purposes, generate messages randomly and send to next node.
 void node::addMessage() {
-	node_state = EXECUTING;
-	int rndNumber;
-	rndNumber = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
-	rndNumber = abs((int)(rndNumber % 2)); // Generate a integer 0-1.
+	node_state = EXECUTING;	
+	rndNumber = (rng->nextUniform()); // Generate a random 32-bit integer
+	//rndNumber = abs((int)(rndNumber % 2)); // Generate a integer 0-1.
 
-	int rndNumber2;
-	rndNumber2 = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
-	rndNumber2 = abs((int)(rndNumber2 % 2)); // Generate a integer 0-1.
+	//int rndNumber2;
+	//rndNumber2 = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
+	//rndNumber2 = abs((int)(rndNumber2 % 2)); // Generate a integer 0-1.
 	
-	// Force a deadlock to occur quicker by increasing the chance of more messages entering the ring topology.
-	if (rndNumber || rndNumber2) {
+	// Force a deadlock to occur quicker by increasing the chance of more messages entering the ring topology	
+	if (rndNumber <= message_gen) { // || rndNumber2) {
 		// Construct and send a message
 		generated = 1;
 

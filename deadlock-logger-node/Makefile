@@ -1,5 +1,5 @@
 # Tell Make that these are NOT files, just targets
-.PHONY: all install test uninstall clean sst-info sst-help viz_makefile viz_dot black mypy help 
+.PHONY: all install test uninstall clean sst-info sst-help viz_makefile viz_dot latex black mypy help 
 
 # shortcut for running anything inside the singularity container
 CONTAINER=/usr/local/bin/additions.sif
@@ -63,6 +63,7 @@ sst-info: $(CONTAINER)
 sst-help: $(CONTAINER)
 	$(SINGULARITY) sst --help
 
+# Converts the makefile into a dot vizualization which is converted to a png file.
 viz_makefile: $(CONTAINER)
 	$(SINGULARITY) makefile2dot --output $(PACKAGE)makefile.dot
 	$(SINGULARITY) dot -Tpng $(PACKAGE)makefile.dot > Makefile_viz.png
@@ -72,9 +73,14 @@ viz_dot: $(CONTAINER) install
 	$(SINGULARITY) sst tests/$(PACKAGE).py --output-dot=$(PACKAGE).dot --dot-verbosity=6
 	$(SINGULARITY) dot -Tpng $(PACKAGE).dot > $(PACKAGE).png
 
+latex: $(CONTANER)
+	$(SINGULARITY) pdflatex $(PACKAGE).tex
+
+# Formatter for python driver files. Runs in target test.
 black: $(CONTAINER)
 	$(SINGULARITY) black tests/*.py
 
+# Static type checker on python driver files. Runs in target test.
 mypy: $(CONTAINER)
 	$(SINGULARITY) mypy tests/*.py
 
