@@ -47,7 +47,7 @@ install: $(CONTAINER) ~/.sst/sstsimulator.conf lib$(PACKAGE).so
 
 # Run the tests for the model
 test: $(CONTAINER) install black mypy
-	$(SINGULARITY) sst tests/deadlockrand.py
+	$(SINGULARITY) sst tests/$(PACKAGE).py
 
 # Unregister the model with SST
 uninstall: $(CONTAINER) ~/.sst/sstsimulator.conf
@@ -70,9 +70,10 @@ viz_makefile: $(CONTAINER)
 
 # Run the tests for the model and output a dot file which is converted to a png file.
 viz_dot: $(CONTAINER) install
-	$(SINGULARITY) sst tests/$(PACKAGE).py --output-dot=$(PACKAGE).dot --dot-verbosity=6
+	$(SINGULARITY) sst tests/$(PACKAGE) --output-dot=$(PACKAGE).dot --dot-verbosity=6
 	$(SINGULARITY) dot -Tpng $(PACKAGE).dot > $(PACKAGE).png
 
+# Converts .tex file with package name to a pdf file.
 latex: $(CONTANER)
 	$(SINGULARITY) pdflatex $(PACKAGE).tex
 

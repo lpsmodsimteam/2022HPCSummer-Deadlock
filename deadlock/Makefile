@@ -63,6 +63,7 @@ sst-info: $(CONTAINER)
 sst-help: $(CONTAINER)
 	$(SINGULARITY) sst --help
 
+# Converts the makefile into a dot vizualization which is converted to a png file.
 viz_makefile: $(CONTAINER)
 	$(SINGULARITY) makefile2dot --output $(PACKAGE)makefile.dot
 	$(SINGULARITY) dot -Tpng $(PACKAGE)makefile.dot > Makefile_viz.png
@@ -72,9 +73,15 @@ viz_dot: $(CONTAINER) install
 	$(SINGULARITY) sst tests/$(PACKAGE).py --output-dot=$(PACKAGE).dot --dot-verbosity=6
 	$(SINGULARITY) dot -Tpng $(PACKAGE).dot > $(PACKAGE).png
 
+# Converts .tex file with package name to a pdf file.
+latex: $(CONTANER)
+	$(SINGULARITY) pdflatex $(PACKAGE).tex
+
+# Formatter for python driver files. Runs in target test.
 black: $(CONTAINER)
 	$(SINGULARITY) black tests/*.py
 
+# Static type checker on python driver files. Runs in target test.
 mypy: $(CONTAINER)
 	$(SINGULARITY) mypy tests/*.py
 
