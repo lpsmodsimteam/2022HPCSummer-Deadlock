@@ -74,10 +74,17 @@ The software developed for this challenge was run on one laptop running an Ubunt
 
 \noindent The software is available on \href{https://github.com/lpsmodsim/2022HPCSummer-CongestiveCollapse}{https://github.com/lpsmodsim/2022HPCSummer-CongestiveCollapse}.\newline
 
-\noindent Assuming the user is on a system running a Ubuntu-Based Linux Distro. To run the software:
+\noindent Assuming the user is on a system running a Ubuntu-Based Linux Distro. To run the software:\newline
 
-%\noindent Prerequisites: 
-\noindent TODO: Add prerequisites (get SST singularity container, add additions.sif, etc))
+\noindent Prerequisites: 
+
+\begin{verbatim}
+	sudo apt install singularity
+	git clone https://github.com/tactcomplabs/sst-containers.git
+	cp sst-containers/singularity/sstpackage-11.1.0-ubuntu-20.04.sif /usr/local/bin/
+	git clone https://github.com/lpsmodsim/2022HPCSummer-SST.git
+	sudo . /2022HPCSummer-SST/additions.def.sh
+\end{verbatim}
 
 \begin{verbatim}
 	git clone https://github.com/lpsmodsim/2022HPCSummer-Deadlock
