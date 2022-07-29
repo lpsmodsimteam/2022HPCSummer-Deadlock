@@ -5,7 +5,7 @@
 
 log::log( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
     output.init("deadlocksim-" + getName() + "->", 1, 0, SST::Output::STDOUT);
-    csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "log_data.csv");
+    csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "output/log_data.csv");
     csvout.output("Time,Node,Node State Changes,Idle Time,Resource Requests\n");
 
     clock = params.find<std::string>("tickFreq", "1s");

@@ -4,7 +4,7 @@ import sst
 import random
 
 NUM_NODES = 3  # Number of nodes
-SEED = 1234    # Seed for randomized parameters.
+SEED = 1234  # Seed for randomized parameters.
 
 # Node parameters are randomly generated between the two ranges for queue size and tick frequency.
 QUEUE_MIN_SIZE = 80  # Minimum possible queue size

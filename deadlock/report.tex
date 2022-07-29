@@ -5,6 +5,15 @@
 
 \usepackage{float}
 
+\usepackage{listings}
+\lstset{
+	basicstyle=\ttfamily,
+	columns=fullflexible,
+	frame=single,
+	breaklines=true,
+	postbreak=\mbox{\textcolor{black}{$\hookrightarrow$}\space},
+}
+
 % margins of 1 inch:
 \setlength{\topmargin}{-.5in}
 \setlength{\textheight}{9.5in}
@@ -79,7 +88,7 @@ The software developed for this challenge was run on one laptop running an Ubunt
 \noindent Prerequisites: 
 
 \begin{verbatim}
-	sudo apt install singularity
+	sudo apt install singularity black mypi
 	git clone https://github.com/tactcomplabs/sst-containers.git
 	cp sst-containers/singularity/sstpackage-11.1.0-ubuntu-20.04.sif /usr/local/bin/
 	git clone https://github.com/lpsmodsim/2022HPCSummer-SST.git
@@ -99,7 +108,19 @@ The software developed for this challenge was run on one laptop running an Ubunt
 	make
 \end{verbatim}
 
-\noindent TODO: Include example output\newline
+\noindent Expected Output:
+
+\begin{lstlisting}[language=bash, frame=none]
+mkdir -p .build
+singularity exec /usr/local/bin/additions.sif g++ -std=c++1y -D__STDC_FORMAT_MACROS -fPIC -DHAVE_CONFIG_H -I/opt/SST/11.1.0/include -MMD -c node.cc -o .build/node.o
+singularity exec /usr/local/bin/additions.sif g++ -std=c++1y -D__STDC_FORMAT_MACROS -fPIC -DHAVE_CONFIG_H -I/opt/SST/11.1.0/include -shared -fno-common -Wl,-undefined -Wl,dynamic_lookup -o libdeadlock.so .build/node.o
+singularity exec /usr/local/bin/additions.sif sst-register deadlock deadlock_LIBDIR=/home/{USER}/sst-work/2022HPCSummer-Deadlock/deadlock
+singularity exec /usr/local/bin/additions.sif black tests/*.py
+singularity exec /usr/local/bin/additions.sif mypy tests/*.py
+Success: no issues found in 2 source files
+singularity exec /usr/local/bin/additions.sif sst tests/deadlockrand.py
+(Simulation console output)
+\end{lstlisting}
 
 \noindent The simulation can be modified by editing the python driver file, it is located at:
 
