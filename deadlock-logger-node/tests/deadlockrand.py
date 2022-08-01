@@ -1,9 +1,9 @@
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
-import sst
+import sst # Use SST Library
 import random
 
-NUM_NODES = 3  # Number of nodes
+NUM_NODES = 3  # Number of nodes (Excluding the logger node).
 SEED = 1234  # Seed for randomized parameters.
 
 # Node parameters are randomly generated between the two ranges for queue size and tick frequency.
@@ -14,18 +14,22 @@ TICK_MAX_FREQ = 5  # Maximum tick frequency of nodes.
 
 random.seed  # Create rng seed.
 
-nodes = dict()  # Create a dictionary of nodes for
+nodes = dict() 
 
 # Create all nodes and assign them a random maximum queue size and tick frequency.
 for x in range(NUM_NODES):
+
+    # Creating a node from element deadlocklog (deadlocklog.node) named "Node {x}".
     nodes[f"node_{x}"] = sst.Component(f"Node {x}", "deadlocklog.node")
+
+    # Adding parameters to sender node.
     nodes[f"node_{x}"].addParams(
         {
-            "queueMaxSize": f"{random.randint(QUEUE_MIN_SIZE, QUEUE_MAX_SIZE)}",
-            "tickFreq": f"{random.randint(TICK_MIN_FREQ, TICK_MAX_FREQ)}ms",
-            "id": f"{x}",
-            "total_nodes": f"{NUM_NODES}",
-            "message_gen": "0.90",
+            "queueMaxSize": f"{random.randint(QUEUE_MIN_SIZE, QUEUE_MAX_SIZE)}", # Max message queue size.
+            "tickFreq": f"{random.randint(TICK_MIN_FREQ, TICK_MAX_FREQ)}ms", # Frequency component ticks at.
+            "id": f"{x}", # ID of node.
+            "total_nodes": f"{NUM_NODES}", # Number of nodes in the simulation (excluding the logger node).
+            "message_gen": "0.90", # Probability that the node will generate a message on tick.
         }
     )
 
@@ -35,8 +39,8 @@ node_log = sst.Component("Logger", "deadlocklog.log")
 # Add parameters to node_log.
 node_log.addParams(
     {
-        "tickFreq": "1ms",
-        "num_nodes": f"{NUM_NODES}",
+        "tickFreq": "1ms", # Frequency component updates at.
+        "num_nodes": f"{NUM_NODES}", # This should be equal to the total number of node components to behave properly.
     }
 )
 

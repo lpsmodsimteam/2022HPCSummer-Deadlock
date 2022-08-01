@@ -1,18 +1,20 @@
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
-import sst
+import sst  # Use SST Library
 
-TOTAL_NODES = 3
+TOTAL_NODES = 3 # Total nodes in simulation. (Excluding the logger node).
 
-# Component node from element deadlock (deadlock.node), named "node_one"
+# Component node from element deadlock (deadlock.node), named "node_zero"
 node_zero = sst.Component("Node 0", "deadlocklog.node")
+
+# Adding parameters to node.
 node_zero.addParams(
     {
-        "queueMaxSize": "120",  # max message queue size.
-        "tickFreq": "3ms",  # simulated time node runs at.
-        "id": "0",  # id of node
-        "total_nodes": f"{TOTAL_NODES}",  # total nodes in simulation
-        "message_gen": "0.90",
+        "queueMaxSize": "120",  # Max message queue size.
+        "tickFreq": "3ms",  # Frequency component updates at. 
+        "id": "0",  # ID of node
+        "total_nodes": f"{TOTAL_NODES}",  # Total nodes in simulation
+        "message_gen": "0.90",  # Probability that the node will generate a message on tick.
     }
 )
 
@@ -39,10 +41,13 @@ node_two.addParams(
 )
 
 
+# Create a log component from element deadlock (deadlocklog.log) named "Logger".
 node_log = sst.Component("Logger", "deadlocklog.log")
+
+# Add parameters to logging node.
 node_log.addParams(
     {
-        "tickFreq": "1ms",
+        "tickFreq": "1ms", # Frequency component updates at.
         "num_nodes": f"{TOTAL_NODES}",  # This should be equal to the total number of node components to behave properly.
     }
 )
