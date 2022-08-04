@@ -4,7 +4,7 @@
 \graphicspath{{./images/}}
 
 \usepackage{float}
-
+\usepackage{hyperref}
 \usepackage{listings}
 \lstset{
 	basicstyle=\ttfamily,
@@ -44,7 +44,7 @@
     % https://stackoverflow.com/a/3408428/1164295
     \begin{minipage}[h]{\textwidth}
         \title{2022 Future Computing Summer Internship Project:\\Modeling Deadlock in a Discrete-Event Simulator to find Metrics to Measure its Existence in a Simulation.}
-        \author{Nicholas Schantz\footnote{nickjohnschantz@gmail.com}}
+        \author{Nicholas Schantz}
         \date{\today}
             \maketitle
         \begin{abstract}
@@ -73,9 +73,8 @@ A second outcome of this work is to develop examples and documentation of SST si
 
 \section{Prior work} % what does this build on?
 
-See https://doi.org/10.1145/357360.357365 for information on deadlock detection but unrelated to metric gathering.
+Chandy and Mishra \cite{1983_Chandy} research and developed a distributed deadlock detection algorithm that measures for cycles of blocked processes that depend on each other. This work inspired the deadlock detection metric for the first SST model explained in section \nameref{sst_model}.
 see %https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6312900
-sse %https://tamcam.tamu.edu/Papers/multirev/multirev.htm
 
 TODO
 
@@ -130,12 +129,14 @@ singularity exec /usr/local/bin/additions.sif sst tests/deadlockrand.py
 	2022HPCSummer-Deadlock/tests/deadlock.py
 \end{verbatim}
 
-\section{Progress}
+\section{The Model}
+\label{sst_model}
 The models created for the deadlock problem were a network of \textit{n} nodes in a ring topology passing messages along the ring in one direction.
 
 The model was built with the conditions for deadlock in mind. The conditions are the following\cite[p. 70]{1971_Coffman}:
 
 \begin{itemize}
+	\label{list:conditions}
 	\item Mutual Exclusion - Process has exclusive access to the resource it is holding.
 	\item Wait for - A process will hold on to a resource while its waiting for a new one.
 	\item No Preemption - A process cannot remove a resource from another process.
@@ -161,9 +162,9 @@ Two models with slight differences were created to demonstrate deadlock and how 
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[scale=0.5]{deadlocklog}\newline
+	\includegraphics[scale=0.5]{deadlocktest}\newline
 	\centering
-	\caption{Example of second model with three nodes connected to one central logging node. FIX DOT FILE: Connections incorrect}
+	\caption{Example of second model with three nodes connected to one central logging node.}
 	\centering
 \end{figure}
 
@@ -177,30 +178,33 @@ In the first model, a global logging node does not exist so a node can only init
 
 In the second model, a global logging node does exist which can keep track of all other nodes' states and determine if they are all in a blocked state. The global logging node will track what nodes are executing or idle, how many times they have requested to send a message to a connected nodes queue while idle, and how many times they have changed states during the simulation. From plotted data, deadlock will occur when all nodes idle time linearly increases, the amount of requests they make linearly increases, and the number of state changes becomes constant. 
 
-An example simulation of the second model is demonstrated.
+An example simulation of the second model is demonstrated. In this simulation, there are three nodes that have a large probability to generate messages (0.90) and send them into the ring network. Over time, the nodes generate more messages and fill up each others queues before the messages reach their destination node to be processed. Once all of the queues are full, none of the nodes can communicate anymore as they wait for other nodes to communicate which makes them deadlocked.
 
 \begin{figure}[H]
-	\includegraphics[scale=0.5]{dead-idle}\newline
+	\includegraphics[scale=0.25]{plot-request}
 	\centering
-	\caption{\color{red} FIX: Update graphs with different line types. }
+	\caption{Number of consecutive cycles in which a node has made a request to access a queue but it was full. As this number increases linearly, the node is more likely to be deadlocked.}
+	\label{fig:idle}
 	\centering
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[scale=0.5]{dead-queue}\newline
+	\includegraphics[scale=0.25]{plot-idle}
 	\centering
-	\caption{\color{red} FIX: Update graphs with different line types.}
+	\caption{Number of consecutive cycles in which a node is idle. This is the same as Figure \ref{fig:idle} because in the simulation, the nodes are constantly requesting for queue space when idle.}
+	\label{fig:request}
 	\centering
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[scale=0.5]{dead-state}\newline
+	\includegraphics[scale=0.25]{plot-state}
 	\centering
-	\caption{\color{red} FIX: Update graphs with different line types.}
+	\caption{Total number of changes between executing and idle for each node. The longer the value is constant the more likely the node is to be deadlocked.}
+	\label{fig:state}
 	\centering
 \end{figure}
 
-Tracking all three of these metrics is a requirement to declare deadlock in the system. 
+Tracking all three of these metrics is a requirement to declare deadlock in the system. One downside of model two's detection metrics is that it can potentially declare deadlock in a system that is only in transient deadlock. In this case, model one might be more useful since it measures all of the nodes' states in a ring and if they are all blocked and idle, then the system is guaranteed to be in a deadlocked state.
 
 % OLD In the first model of the simulation where nodes do not share information with each other, a single node can determine when it is in a blocked state. The node will detect that it has been in a idle state for a predetermined set of time and it has been making request for a node's queue for a large number of time. At this point the node will send out a probe along the ring to determine if other nodes are currently executing. If any nodes are executing, they will drop the probe, otherwise they will pass the probe along. If the sender node receives its own probe, it determines that all nodes are in a deadlocked state so system-deadlock has occurred.
 
@@ -208,8 +212,13 @@ Tracking all three of these metrics is a requirement to declare deadlock in the 
 
 
 \section{Future Work}
-Currently, more work needs to be performed on detecting component-scale deadlock in a simulation.
-TODO
+Currently, more work needs to be performed on detecting component-scale deadlock in a simulation. Potentially the metrics explained in this report can be used to detect if a ring of nodes is in a deadlocked state, and any nodes outside of the ring, but have to communicate to it, could become deadlocked as well.
+
+The first model will detect deadlock but the second model could detect a transient deadlock if the user defines there thresholds for detection as too small. A combination of both models' detection methods can be used if logger nodes are necessary in simulation.
+
+The models should be expanded to support more than just a ring topology. The metrics should be tested against these other topologies to see if they still remain accurate.
+
+Finally, the model should support enabling and disabling the conditions for deadlock in different components of the model. The two models explained in this report have the conditions for deadlock baked into the model to force deadlock to occur. Different metrics for deadlock detection could be discovered by making the conditions for deadlock variable.
 
 \bibliographystyle{plain}
 \bibliography{biblio}

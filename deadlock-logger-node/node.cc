@@ -8,16 +8,6 @@
 #include <sst/core/stopAction.h>
 #include "node.h" 
 
-//TODO
-/*	
-	doxygen comments
-
-	output file
-
-	Future if time: Three ports allowing more than just a ring topology network.
-
-*/
-
 // Constructor definition
 node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	output.init("deadlocksim-" + getName() + "->", 1, 0, SST::Output::STDOUT); // Formatting output for console.
