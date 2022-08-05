@@ -9,7 +9,6 @@
  */
 enum MessageTypes {
 	MESSAGE,	/**< Type for messages which are stored in a node's queue or consumed. */
-	STATUS,		/**< Type for messages which node's instantly pass along to determine if a system-deadlock has occured. */
 };
 
 /**

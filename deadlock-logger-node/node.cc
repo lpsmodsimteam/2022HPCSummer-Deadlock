@@ -95,27 +95,9 @@ bool node::tick( SST::Cycle_t currentCycle ) {
 
 	node_state = IDLE;
 
-	// Checking if no credits are available and if the node is the initiator.
-	/**
-	if ( queueCredits <= 0 && node_id == 0) {
-		// If the node has no credits, it is idling. Send out a status message to check for deadlock.
-		output.verbose(CALL_INFO, 2, 0, "Status Check\n");
-
-		// Construct Status message.
-		struct Message statusMsg = { node_id, node_id, WAITING, STATUS };
-		nextPort->send(new MessageEvent(statusMsg));
-	} */
-
 	// Node is blocked from sending.
 	if (queueCredits <= 0) {
 		block_requests++;
-	}
-
-	if ( idle_duration > 50 && block_requests > 25 ) {
-		output.verbose(CALL_INFO, 2, 0, "Status Check\n");
-
-		struct Message statusMsg = { node_id, node_id, WAITING, STATUS };
-		nextPort->send(new MessageEvent(statusMsg));
 	}
 
 	// Rng and generate message to send out.
@@ -165,33 +147,6 @@ void node::messageHandler(SST::Event *ev) {
 					output.verbose(CALL_INFO, 2, 0, "Message was dropped\n");
 				}
 				break;
-			case STATUS:
-				// Check which node the message originated from:
-				output.verbose(CALL_INFO, 2, 0, "Received a STATUS from id %d\n", me->msg.source_id);
-				// If the message originated from the same node, the status message has looped through
-				// the ring of nodes back to its original sender.
-				if (me->msg.source_id == node_id) {
-					// All nodes in the ring have status WAITING, and the initiator node is still in a waiting state. A deadlock has occured.
-					if (me->msg.status == WAITING) {
-						std::cout << getName() << " detected a deadlock. Ending simulation." << std::endl;
-						//SST::StopAction exit;
-						//exit.execute();
-					}
-				} else { 
-					// 2. The node receives the status WAITING. In this case the previous node(s) is waiting.
-					//	  The current node determines if it can send or if its waiting as well and updates the status before passing the message along.
-						if (me->msg.status == WAITING && queueCredits <= 0) {
-							struct Message top = msgqueue.front();
-							if (queueCredits <= 0 && top.dest_id != ((node_id + 1) % total_nodes)) {
-								// The node cannot send out any messages so it passes the WAITING status forward.
-								struct Message statusMsg = { me->msg.source_id, me->msg.dest_id, WAITING, STATUS };
-								nextPort->send(new MessageEvent(statusMsg));
-							} 
-						} else {
-							output.verbose(CALL_INFO, 2, 0, "Dropped the status. Can still send.");
-						}
-				}
-				break;
 		}
 	}
 	delete ev; // Clean up event to prevent memory leaks.
@@ -235,14 +190,8 @@ void node::sendLog() {
 void node::addMessage() {
 	node_state = EXECUTING;	
 	rndNumber = (rng->nextUniform()); // Generate a random 32-bit integer
-	//rndNumber = abs((int)(rndNumber % 2)); // Generate a integer 0-1.
-
-	//int rndNumber2;
-	//rndNumber2 = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
-	//rndNumber2 = abs((int)(rndNumber2 % 2)); // Generate a integer 0-1.
 	
-	// Force a deadlock to occur quicker by increasing the chance of more messages entering the ring topology	
-	if (rndNumber <= message_gen) { // || rndNumber2) {
+	if (rndNumber <= message_gen) {
 		// Construct and send a message
 		generated = 1;
 

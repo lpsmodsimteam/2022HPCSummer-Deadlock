@@ -4,13 +4,18 @@
 #include "log.h"
 
 log::log( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
+    // Configure console output and data output to a csv file.
     output.init("deadlocksim-" + getName() + "->", 1, 0, SST::Output::STDOUT);
     csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "output/log_data.csv");
     csvout.output("Time,Node,Node State Changes,Idle Time,Resource Requests\n");
 
+    // Parameters
     clock = params.find<std::string>("tickFreq", "1s");
     num_ports = params.find<int64_t>("num_nodes", 1);
+    idle_threshold = params.find<int64_t>("idle_threshold", 50);
+    request_threshold = params.find<int64_t>("idle_threshold", 50);
     
+    // Arrays
     idleArray = (int*) malloc(num_ports * sizeof(int));
     stateArray = (int*) malloc(num_ports * sizeof(int));
     requestArray = (int*) malloc(num_ports * sizeof(int));
@@ -21,6 +26,7 @@ log::log( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();
 
+    // Configure a variable number of ports.
     port = new SST::Link*[num_ports];
     for (int i = 0; i < num_ports; ++i) {
         std::string strport = "port" + std::to_string(i);
@@ -50,13 +56,16 @@ void log::setup() {
 
 bool log::tick( SST::Cycle_t currentCycle ) { 
 
+    // Console output.
     for(int i = 0; i < num_ports; ++i) {
-        output.output(CALL_INFO, "Node %d:%d,%d,%d\n", i, stateArray[i], idleArray[i], requestArray[i]);
+        output.output(CALL_INFO, "Node %d: Current State: %d, Consecutive Cycles Idle: %d, Consecutive Queue Request: %d\n", i, stateArray[i], idleArray[i], requestArray[i]);
         csvout.output("%ld,Node_%d,%d,%d,%d\n", getCurrentSimTime(), i, stateChanges[i], idleArray[i], requestArray[i]);
     }
+    output.output("\n");
 
+    // Check if all monitored nodes exceed the conditions to declare deadlock.
     for(int i = 0; i < num_ports; ++i) {
-        if (stateArray[i] == 0 && idleArray[i] > 50 && requestArray[i] > 50) {
+        if (stateArray[i] == 0 && idleArray[i] > idle_threshold && requestArray[i] > request_threshold) {
             deadlocked = true;
         } else {
             deadlocked = false;
@@ -64,6 +73,7 @@ bool log::tick( SST::Cycle_t currentCycle ) {
         }
     }
 
+    // If deadlocked, end simulation.
     if (deadlocked) {
         output.output(CALL_INFO, "Detected Deadlock. Ending Simulation.\n");
         primaryComponentOKToEndSim();

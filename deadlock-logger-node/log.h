@@ -74,6 +74,8 @@ public:
     SST_ELI_DOCUMENT_PARAMS(
         {"tickFreq", "The frequency the component is called at.", "1s"},
         {"num_nodes", "The number of nodes that the logger is logging.", "1"},
+        {"idle_threshold", "The number of consecutive cycles idle that all monitored nodes must exceed for deadlock to be declared.", "50"},
+        {"request_threshold", "The number of consecutive request that all monitored nodes must exceed for deadlock to be declared.", "50"},
     )
 
     /**
@@ -97,6 +99,9 @@ private:
     int *stateChanges; //!< Pointer to data for how many times each node has changed states.
     int *idleArray; //!< Pointer to data for each node's time idle.
     int *requestArray; //!< Pointer to data for each node's number of requests to send a message.
+
+    int idle_threshold; //!< The number of consecutive cycles idle that all monitored nodes must exceed for deadlock to be declared.
+    int request_threshold; //!< The number of consecutive request that all monitored nodes must exceed for deadlock to be declared.
 
     bool deadlocked; //!< Declares if system is in deadlock.
 };

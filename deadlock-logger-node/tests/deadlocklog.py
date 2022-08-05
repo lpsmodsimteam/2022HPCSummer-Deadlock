@@ -49,6 +49,8 @@ node_log.addParams(
     {
         "tickFreq": "1ms",  # Frequency component updates at.
         "num_nodes": f"{TOTAL_NODES}",  # This should be equal to the total number of node components to behave properly.
+        "idle_threshold": "50",  # The number of consecutive cycles idle that all monitored nodes must exceed for deadlock to be declared.
+        "request_threshold": "50",  # The number of consecutive request that all monitored nodes must exceed for deadlock to be declared.
     }
 )
 

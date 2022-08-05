@@ -1,4 +1,4 @@
-# TCP Global Synchronization Example
+# Deadlock Example
 
 ## Prerequisites
 ```
@@ -61,6 +61,8 @@ node_log.addParams(
     {
         "tickFreq": "1ms", # Frequency component updates at.
         "num_nodes": f"{TOTAL_NODES}",  # This should be equal to the total number of node components to behave properly.
+        "idle_threshold": "50", # The number of consecutive cycles idle that all monitored nodes must exceed for deadlock to be declared.
+        "request_threshold": "50", # The number of consecutive request that all monitored nodes must exceed for deadlock to be declared.
     }
 )
 
@@ -127,10 +129,10 @@ sudo apt install gnuplot
 
 Plot the output data using the provided example script
 ```
-gnuplot -c example-plot.gp 3
+gnuplot example-plot.gp
 ```
 
-You should see the following output (click to expand):
+You will see the following output in 2022HPCSummer-Deadlock/deadlock-logger-node/ (click to expand):
 
 plot-idle.png
 
@@ -144,3 +146,12 @@ plot-state.png
 
 <img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-Deadlock/main/deadlock-logger-node/example_plots/plot-state.png" width="720"/>
 
+# Generate Documentation
+
+```
+sudo apt install doxygen
+cd 2022HPCSummer-Deadlock
+doxygen doxygen-conf
+```
+
+Doxygen documentation will be generated in 2022HPCSummer-Deadlock/deadlock-logger-node.html and can be opened by accessing 2022HPCSummer-Deadlock/deadlock-logger-node/html/index.html
