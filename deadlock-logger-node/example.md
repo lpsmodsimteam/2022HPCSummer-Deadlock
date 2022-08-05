@@ -134,13 +134,13 @@ You should see the following output (click to expand):
 
 plot-idle.png
 
-<img src ="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-rate-sync.png" width="720">
+<img src ="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-Deadlock/main/deadlock-logger-node/example_plots/plot-idle.png" width="720">
 
 plot-request.png
 
-<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-point-sync.png" width="720"/>
+<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-Deadlock/main/deadlock-logger-node/example_plots/plot-request.png" width="720"/>
 
 plot-state.png
 
-<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-avg-sync.png" width="720"/>
+<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-Deadlock/main/deadlock-logger-node/example_plots/plot-state.png" width="720"/>
 
