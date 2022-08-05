@@ -1,8 +1,20 @@
+# TCP Global Synchronization Example
+
+## Prerequisites
+```
+git clone https://github.com/lpsmodsim/2022HPCSummer-Deadlock.git
+```
+
+# Demonstrate deadlock detection with a logging node.
+Use the following python driver file.
+
+Copy to 2022HPCSummer-Deadlock/deadlock-logger-node/tests/deadlocklog.py
+```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
 import sst  # Use SST Library
 
-TOTAL_NODES = 3  # Total nodes in simulation. (Excluding the logger node).
+TOTAL_NODES = 3 # Total nodes in simulation. (Excluding the logger node).
 
 # Component node from element deadlock (deadlock.node), named "node_zero"
 node_zero = sst.Component("Node 0", "deadlocklog.node")
@@ -11,7 +23,7 @@ node_zero = sst.Component("Node 0", "deadlocklog.node")
 node_zero.addParams(
     {
         "queueMaxSize": "120",  # Max message queue size.
-        "tickFreq": "3ms",  # Frequency component updates at.
+        "tickFreq": "3ms",  # Frequency component updates at. 
         "id": "0",  # ID of node
         "total_nodes": f"{TOTAL_NODES}",  # Total nodes in simulation
         "message_gen": "0.90",  # Probability that the node will generate a message on tick.
@@ -47,7 +59,7 @@ node_log = sst.Component("Logger", "deadlocklog.log")
 # Add parameters to logging node.
 node_log.addParams(
     {
-        "tickFreq": "1ms",  # Frequency component updates at.
+        "tickFreq": "1ms", # Frequency component updates at.
         "num_nodes": f"{TOTAL_NODES}",  # This should be equal to the total number of node components to behave properly.
     }
 )
@@ -75,3 +87,60 @@ sst.Link("Log_Link_One").connect(
 sst.Link("Log_Link_Two").connect(
     (node_two, "logPort", "1ps"), (node_log, "port2", "1ps")
 )
+```
+
+# Running
+This is assuming the user is on a system running a Ubuntu-Based Linux Distro.
+
+Prerequisites
+```
+sudo apt install singularity black mypi
+git clone https://github.com/tactcomplabs/sst-containers.git
+```
+Follow the instructions in the git repo to build the container "sstpackage-11.1.0-ubuntu-20.04.sif".
+```
+cp sst-containers/singularity/sstpackage-11.1.0-ubuntu-20.04.sif /usr/local/bin/
+git clone https://github.com/lpsmodsim/2022HPCSummer-SST.git
+sudo ./2022HPCSummer-SST/additions.def.sh
+```
+
+Running the model
+```
+cd 2022HPCSummer-Deadlock/deadlock-logger-node
+make
+```
+
+Re-run the model
+```
+make clean
+make
+```
+
+Simulation output is generated in 2022HPCSummer-Deadlock/deadlock-logger-node/output
+
+# Plotting
+
+Install gnuplot
+```
+sudo apt install gnuplot
+```
+
+Plot the output data using the provided example script
+```
+gnuplot -c example-plot.gp 3
+```
+
+You should see the following output (click to expand):
+
+plot-idle.png
+
+<img src ="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-rate-sync.png" width="720">
+
+plot-request.png
+
+<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-point-sync.png" width="720"/>
+
+plot-state.png
+
+<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-avg-sync.png" width="720"/>
+

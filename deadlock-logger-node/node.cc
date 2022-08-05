@@ -24,6 +24,7 @@ node::node( SST::ComponentId_t id, SST::Params& params) : SST::Component(id) {
 	queueCurrSize = 0;
 	queueCredits = 0;
 	generated = 0;
+	rndNumber = 0;
 
 	// Initialize Random
 	rng = new SST::RNG::MarsagliaRNG(10, randSeed); // Create a Marsaglia RNG with a default value and a random seed.
