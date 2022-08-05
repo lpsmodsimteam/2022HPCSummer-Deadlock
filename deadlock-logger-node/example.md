@@ -154,4 +154,5 @@ cd 2022HPCSummer-Deadlock
 doxygen doxygen-conf
 ```
 
-Doxygen documentation will be generated in 2022HPCSummer-Deadlock/deadlock-logger-node.html and can be opened by accessing 2022HPCSummer-Deadlock/deadlock-logger-node/html/index.html
+Doxygen documentation will be generated in 2022HPCSummer-Deadlock/deadlock-logger-node/html
+It can be opened by accessing 2022HPCSummer-Deadlock/deadlock-logger-node/html/index.html
