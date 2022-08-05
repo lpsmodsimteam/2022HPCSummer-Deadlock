@@ -19,11 +19,13 @@ node::node(SST::ComponentId_t id, SST::Params &params) : SST::Component(id)
 	randSeed = params.find<int64_t>("randseed", 121212);
 	node_id = params.find<int64_t>("id", 1);
 	total_nodes = params.find<int64_t>("total_nodes", 5);
+	message_gen = params.find<float>("message_gen", 0.5);
 
 	// Initialize Variables
 	queueCurrSize = 0;
 	queueCredits = 0;
 	generated = 0;
+	rndNumber = 0;
 
 	// Initialize Random
 	rng = new SST::RNG::MarsagliaRNG(10, randSeed); // Create a Marsaglia RNG with a default value and a random seed.
@@ -95,44 +97,16 @@ bool node::tick(SST::Cycle_t currentCycle)
 		// output.verbose(CALL_INFO, 1, 0, "\n--------------------------Sim-Time: %lu--------------------------\n", getCurrentSimTime());
 		std::cout << "\n Sim-Time: " << getCurrentSimTime() << std::endl;
 	}
-	output.verbose(CALL_INFO, 1, 0, "Status: %d | Credits: %d | Time Idle: %d | Requests %d\n", node_state, queueCredits, idle_duration, block_requests);
 	output.verbose(CALL_INFO, 2, 0, "Size of queue: %ld\n", msgqueue.size());
 	output.verbose(CALL_INFO, 2, 0, "Amount of credits: %d\n", queueCredits);
 
-	if (node_state == IDLE)
-	{
-		idle_duration++;
-	}
-	else
-	{
-		idle_duration = 0;
-		block_requests = 0;
-	}
-
-	node_state = IDLE;
-
 	// Checking if no credits are available and if the node is the initiator.
-	/**
 	if ( queueCredits <= 0 && node_id == 0) {
 		// If the node has no credits, it is idling. Send out a status message to check for deadlock.
 		output.verbose(CALL_INFO, 2, 0, "Status Check\n");
 
 		// Construct Status message.
 		struct Message statusMsg = { node_id, node_id, WAITING, STATUS };
-		nextPort->send(new MessageEvent(statusMsg));
-	} */
-
-	// Node is blocked from sending.
-	if (queueCredits <= 0)
-	{
-		block_requests++;
-	}
-
-	if (idle_duration > 50 && block_requests > 25)
-	{
-		output.verbose(CALL_INFO, 2, 0, "Status Check\n");
-
-		struct Message statusMsg = {node_id, node_id, WAITING, STATUS};
 		nextPort->send(new MessageEvent(statusMsg));
 	}
 
@@ -246,7 +220,6 @@ void node::creditHandler(SST::Event *ev)
 // Simulate sending a single message out to linked component in composition.
 void node::sendMessage()
 {
-	node_state = EXECUTING;
 	struct Message msg = msgqueue.front();
 	msgqueue.pop();
 	nextPort->send(new MessageEvent(msg));
@@ -264,17 +237,10 @@ void node::sendCredits()
 // Simulation purposes, generate messages randomly and send to next node.
 void node::addMessage()
 {
-	node_state = EXECUTING;
-	int rndNumber;
-	rndNumber = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
-	rndNumber = abs((int)(rndNumber % 2));		 // Generate a integer 0-1.
-
-	int rndNumber2;
-	rndNumber2 = (int)(rng->generateNextInt32()); // Generate a random 32-bit integer
-	rndNumber2 = abs((int)(rndNumber2 % 2));	  // Generate a integer 0-1.
+	rndNumber = (rng->nextUniform());
 
 	// Force a deadlock to occur quicker by increasing the chance of more messages entering the ring topology.
-	if (rndNumber || rndNumber2)
+	if (rndNumber <= message_gen)
 	{
 		// Construct and send a message
 		generated = 1;

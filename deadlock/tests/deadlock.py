@@ -14,6 +14,7 @@ node_zero.addParams(
         "tickFreq": "3ms",  # frequency node updates at.
         "id": "0",  # id of node.
         "total_nodes": f"{TOTAL_NODES}",  # total nodes in simulation.
+        "message_gen": "0.90",
     }
 )
 
@@ -24,6 +25,7 @@ node_one.addParams(
         "tickFreq": "5ms",
         "id": "1",
         "total_nodes": f"{TOTAL_NODES}",
+        "message_gen": "0.90",
     }
 )
 
@@ -34,6 +36,7 @@ node_two.addParams(
         "tickFreq": "2ms",
         "id": "2",
         "total_nodes": f"{TOTAL_NODES}",
+        "message_gen": "0.90",
     }
 )
 
