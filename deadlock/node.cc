@@ -11,7 +11,7 @@
 // Constructor definition
 node::node(SST::ComponentId_t id, SST::Params &params) : SST::Component(id)
 {
-	output.init("deadlocksim-" + getName() + "->", 1, 0, SST::Output::STDOUT); // Formatting output for console.
+	output.init("deadlocksim-" + getName() + "->", 2, 0, SST::Output::STDOUT); // Formatting output for console.
 
 	// Get parameters
 	queueMaxSize = params.find<int64_t>("queueMaxSize", 50);
@@ -199,7 +199,7 @@ void node::messageHandler(SST::Event *ev)
 				}
 				else
 				{
-					output.verbose(CALL_INFO, 2, 0, "Dropped the status. Can still send.");
+					output.verbose(CALL_INFO, 2, 0, "Dropped the status. Can still send.\n");
 				}
 			}
 			break;

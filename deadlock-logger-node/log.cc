@@ -92,8 +92,7 @@ bool log::tick( SST::Cycle_t currentCycle ) {
 
 void log::messageHandler( SST::Event *ev ) { 
     LogEvent *le = dynamic_cast<LogEvent*>(ev);
-    if (le != NULL) { 
-        output.output("Receiving log from node %d\n", le->log.node_id); 
+    if (le != NULL) {  
         idleArray[le->log.node_id] = le->log.idle_time;
         requestArray[le->log.node_id] = le->log.num_requests;
         if(stateArray[le->log.node_id] != le->log.node_status) {
