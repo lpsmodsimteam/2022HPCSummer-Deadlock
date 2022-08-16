@@ -22,3 +22,22 @@ This demonstration of deadlock relies only on [SST-Core](https://github.com/ssts
 The intended audience for this documentation has basic familiar with use of SST, C++, Python, Makefiles.
 
 Documentation should explain how the concept of deadlock is mapped to the SST model.
+
+
+# Literature Review
+
+## "Deadlock Detection in Distributed Systems"  
+Ajay Kshemkalyani and Mukesh Singhal  
+<https://www.cs.uic.edu/~ajayk/Chapter10.pdf>
+
+## "Distributed Deadlock Detection Algorithm"
+R. Obermarck  
+<https://personal.utdallas.edu/~praba/obermarck.pdf>
+
+## A Survey Of Distributed Deadlock Detection Algorithms
+<https://dl.acm.org/doi/pdf/10.1145/15833.15837>
+
+## Distributed Deadlock Detection 
+<https://dl.acm.org/doi/pdf/10.1145/357360.357365>
+
+<http://www.inf.ufsc.br/~frank.siqueira/BDD/Artigos/A%20One-Phase%20Algorithm%20to%20Detect%20Distributed%20Deadlocks%20in%20Replicated%20Databases.pdf>
